@@ -28,7 +28,32 @@ const PDFImport = () => {
   const [confirming, setConfirming] = useState(false);
   const [scannedAlert, setScannedAlert] = useState(null);
 
-  const { showToast } = useAuth();
+  // Course / Category State
+  const [skillsMaster, setSkillsMaster] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState('MERN Stack');
+  const [customCourse, setCustomCourse] = useState('');
+
+  React.useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        const res = await API.get('/skills?status=active');
+        setSkillsMaster(res.data || []);
+        if (res.data && res.data.length > 0) {
+          setSelectedCourse(res.data[0].name);
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+    fetchSkills();
+  }, []);
+
+  const getEffectiveCategory = () => {
+    if (selectedCourse === 'CUSTOM') {
+      return customCourse.trim() || 'General';
+    }
+    return selectedCourse || 'MERN Stack';
+  };
 
   const handleFileDrop = (e) => {
     e.preventDefault();
@@ -78,10 +103,16 @@ const PDFImport = () => {
         return;
       }
 
+      const categoryToApply = getEffectiveCategory();
+      const categorisedQuestions = (data.questions || []).map((q) => ({
+        ...q,
+        category: categoryToApply,
+      }));
+
       setParseResult(data);
-      setQuestions(data.questions || []);
+      setQuestions(categorisedQuestions);
       setStep('review');
-      showToast(`Parsed ${data.totalDetected || 0} questions from PDF. Please review.`, 'success');
+      showToast(`Parsed ${data.totalDetected || 0} questions under '${categoryToApply}'. Please review.`, 'success');
     } catch (err) {
       showToast(err.response?.data?.message || 'Failed to process PDF', 'error');
     } finally {
@@ -114,13 +145,15 @@ const PDFImport = () => {
     }
 
     setConfirming(true);
+    const categoryToApply = getEffectiveCategory();
     try {
       const res = await API.post('/questions/import-confirm', {
         questions,
         importType,
+        category: categoryToApply,
       });
 
-      showToast(res.data.message || 'Questions imported successfully!', 'success');
+      showToast(res.data.message || `Questions imported successfully for '${categoryToApply}'!`, 'success');
       setStep('success');
     } catch (err) {
       showToast(err.response?.data?.message || 'Failed to confirm import', 'error');
@@ -183,6 +216,61 @@ const PDFImport = () => {
       {/* STEP 1: Upload Screen */}
       {step === 'upload' && (
         <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl space-y-6 max-w-3xl mx-auto">
+          {/* Target Course / Category Selection */}
+          <div className="bg-slate-950 border border-slate-800 p-5 rounded-xl space-y-3">
+            <div className="flex items-center space-x-2 text-xs font-bold text-white">
+              <FiLayers className="text-indigo-400 text-sm" />
+              <span>Select Target Course / Technology Category <span className="text-rose-400">*</span></span>
+            </div>
+            <p className="text-[11px] text-slate-400">
+              All questions extracted from the PDF will be categorized under this course in the MongoDB Question Bank.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  Course / Technology
+                </label>
+                <select
+                  value={selectedCourse}
+                  onChange={(e) => setSelectedCourse(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white font-bold focus:outline-none focus:border-indigo-500"
+                >
+                  {skillsMaster.map((skill) => (
+                    <option key={skill._id} value={skill.name}>
+                      {skill.name} ({skill.code || 'Skill'})
+                    </option>
+                  ))}
+                  <option value="MERN Stack">MERN Stack</option>
+                  <option value="Python">Python Development</option>
+                  <option value="UI/UX Design">UI/UX Design</option>
+                  <option value="Java">Java Development</option>
+                  <option value="React Native">React Native / Mobile</option>
+                  <option value="Node.js">Node.js / Backend</option>
+                  <option value="PHP / Laravel">PHP / Laravel</option>
+                  <option value="DevOps">DevOps & Cloud</option>
+                  <option value="CUSTOM">+ Specify Custom Course Name...</option>
+                </select>
+              </div>
+
+              {selectedCourse === 'CUSTOM' && (
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                    Custom Course Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Flutter, Cybersecurity, Data Science..."
+                    value={customCourse}
+                    onChange={(e) => setCustomCourse(e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    required
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Drag and Drop Zone */}
           <div
             onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
@@ -272,7 +360,11 @@ const PDFImport = () => {
       {step === 'review' && parseResult && (
         <div className="space-y-6">
           {/* Summary Stats Header */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+            <div>
+              <p className="text-[10px] text-slate-400 uppercase font-bold">Target Course</p>
+              <p className="text-xs font-bold text-indigo-400 truncate">{getEffectiveCategory()}</p>
+            </div>
             <div>
               <p className="text-[10px] text-slate-400 uppercase font-bold">File Name</p>
               <p className="text-xs font-bold text-white truncate">{parseResult.fileName}</p>

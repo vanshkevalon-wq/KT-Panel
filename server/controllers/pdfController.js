@@ -38,7 +38,7 @@ const importPdf = async (req, res, next) => {
 // @access  Private (Admin, Theory, Practical)
 const confirmImport = async (req, res, next) => {
   try {
-    const { questions, importType = 'theory' } = req.body;
+    const { questions, importType = 'theory', category } = req.body;
 
     if (!Array.isArray(questions) || questions.length === 0) {
       return res.status(400).json({ message: 'No reviewed questions provided for import.' });
@@ -57,7 +57,7 @@ const confirmImport = async (req, res, next) => {
             text: opt.text || '',
           })),
           correctAnswer: q.correctAnswer || (q.options[0]?.label || 'A'),
-          category: q.category || 'Imported PDF',
+          category: q.category && q.category !== 'Imported PDF' ? q.category : category || 'General',
           difficulty: q.difficulty || 'medium',
           marks: q.marks || 1,
           explanation: q.explanation || `Imported from ${q.sourceFileName || 'PDF'}`,
@@ -80,8 +80,8 @@ const confirmImport = async (req, res, next) => {
           description: q.description || q.questionText || 'Task details imported from PDF',
           instructions: q.instructions || 'Review instructions provided in description',
           expectedOutput: q.expectedOutput || '',
-          technologies: Array.isArray(q.technologies) ? q.technologies : ['JavaScript'],
-          category: q.category || 'Imported PDF',
+          technologies: Array.isArray(q.technologies) ? q.technologies : [category || 'JavaScript'],
+          category: q.category && q.category !== 'Imported PDF' ? q.category : category || 'General',
           difficulty: q.difficulty || 'medium',
           marks: q.marks || 10,
           timeLimit: q.timeLimit || 60,
