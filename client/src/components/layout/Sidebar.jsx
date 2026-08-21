@@ -143,17 +143,11 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
         {/* Header Branding */}
         <div className="h-16 px-5 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black text-lg">
-              KT
-            </div>
-            <div>
-              <h1 className="font-bold text-sm text-white tracking-wide leading-tight">
-                Kevalon Technology
-              </h1>
-              <p className="text-[10px] text-slate-400 tracking-wider uppercase font-semibold">
-                Management System
-              </p>
-            </div>
+            <img
+              src="/kevalon-logo.png"
+              alt="Kevalon Technology Logo"
+              className="h-9 w-auto object-contain"
+            />
           </div>
 
           <button

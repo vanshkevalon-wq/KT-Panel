@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth, ROLE_REDIRECTS } from '../../context/AuthContext';
 import Modal from '../../components/common/Modal';
+import ThemeToggle from '../../components/common/ThemeToggle';
+import KevalonLogo from '../../components/common/KevalonLogo';
 import {
   FiUserCheck,
   FiLock,
@@ -19,7 +21,6 @@ import {
   FiGlobe,
   FiCheckCircle,
   FiChevronRight,
-  FiX,
 } from 'react-icons/fi';
 
 const LandingPage = () => {
@@ -117,103 +118,102 @@ const LandingPage = () => {
       title: 'Admin Panel',
       description: 'System administration, user roles, skills master & system settings.',
       icon: FiShield,
-      color: 'from-rose-500/20 to-pink-500/20 text-rose-400 border-rose-500/30',
       badge: 'Email + Password',
+      color: 'border-rose-500/30 text-rose-500 dark:text-rose-400',
     },
     {
       id: 'hr',
       title: 'HR Panel',
       description: 'Candidate registration, assessment creation & interview management.',
       icon: FiUsers,
-      color: 'from-indigo-500/20 to-purple-500/20 text-indigo-400 border-indigo-500/30',
       badge: 'Email + Password',
+      color: 'border-indigo-500/30 text-indigo-600 dark:text-indigo-400',
     },
     {
       id: 'receptionist',
       title: 'Receptionist Desk',
       description: 'Candidate check-in verification, physical presence & queue trigger.',
       icon: FiUserCheck,
-      color: 'from-purple-500/20 to-violet-500/20 text-purple-400 border-purple-500/30',
       badge: 'Email + Password',
+      color: 'border-purple-500/30 text-purple-600 dark:text-purple-400',
     },
     {
       id: 'employee',
       title: 'Employee Panel',
       description: 'Skill-matched interview assignments, evaluation & grading.',
       icon: FiBriefcase,
-      color: 'from-cyan-500/20 to-blue-500/20 text-cyan-400 border-cyan-500/30',
       badge: 'Email + Password',
+      color: 'border-cyan-500/30 text-cyan-600 dark:text-cyan-400',
     },
     {
       id: 'theory',
       title: 'Theory Panel',
       description: 'Theory question bank, categories, exam creation & valuation.',
       icon: FiBookOpen,
-      color: 'from-amber-500/20 to-orange-500/20 text-amber-400 border-amber-500/30',
       badge: 'Email + Password',
+      color: 'border-amber-500/30 text-amber-600 dark:text-amber-400',
     },
     {
       id: 'practical',
       title: 'Practical Panel',
       description: 'Coding tasks, practical assignments & code submission grading.',
       icon: FiCode,
-      color: 'from-emerald-500/20 to-teal-500/20 text-emerald-400 border-emerald-500/30',
       badge: 'Email + Password',
+      color: 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400',
     },
     {
       id: 'candidate',
       title: 'Candidate Portal',
       description: 'Track application progress, interview stage & final results.',
       icon: FiAward,
-      color: 'from-teal-500/20 to-emerald-500/20 text-teal-400 border-teal-500/30',
       badge: 'Enrollment # + Mobile #',
+      color: 'border-teal-500/30 text-teal-600 dark:text-teal-400',
       isCandidate: true,
     },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950 flex flex-col">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-sky-500 selection:text-white flex flex-col transition-colors duration-300">
       {/* Header Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80">
+      <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 shadow-sm transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           {/* Logo & Branding */}
           <div className="flex items-center space-x-4">
-            <img
-              src="/kevalon-logo.svg"
-              alt="Kevalon Technology Logo"
-              className="h-10 w-auto object-contain"
-            />
-            <div className="hidden sm:block border-l border-slate-800 pl-4">
-              <span className="text-[11px] font-extrabold uppercase tracking-widest text-cyan-400 block">
+            <KevalonLogo />
+            <div className="hidden md:block border-l border-slate-200 dark:border-slate-800 pl-4">
+              <span className="text-[11px] font-extrabold uppercase tracking-widest text-sky-600 dark:text-sky-400 block">
                 Careers & Talent Portal
               </span>
-              <span className="text-[10px] text-slate-400 tracking-wider">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 tracking-wider">
                 Management System
               </span>
             </div>
           </div>
 
           {/* Nav Links */}
-          <nav className="hidden md:flex items-center space-x-8 text-xs font-semibold text-slate-300">
-            <a href="#positions" className="hover:text-white transition">
+          <nav className="hidden lg:flex items-center space-x-8 text-xs font-bold text-slate-700 dark:text-slate-300">
+            <a href="#positions" className="hover:text-sky-600 dark:hover:text-white transition">
               Open Positions
             </a>
-            <a href="#why-us" className="hover:text-white transition">
+            <a href="#why-us" className="hover:text-sky-600 dark:hover:text-white transition">
               Why Join Us
             </a>
-            <a href="#panels" className="hover:text-white transition">
+            <a href="#panels" className="hover:text-sky-600 dark:hover:text-white transition">
               Portal Panels
             </a>
-            <a href="#process" className="hover:text-white transition">
+            <a href="#process" className="hover:text-sky-600 dark:hover:text-white transition">
               Process
             </a>
-            <a href="#contact" className="hover:text-white transition">
+            <a href="#contact" className="hover:text-sky-600 dark:hover:text-white transition">
               Contact HR
             </a>
           </nav>
 
-          {/* Action Buttons */}
+          {/* Action Buttons & Theme Toggle */}
           <div className="flex items-center space-x-3">
+            {/* Theme Toggle Button */}
+            <ThemeToggle className="shadow-sm" />
+
             {user ? (
               <button
                 onClick={handleDashboardRedirect}
@@ -226,15 +226,15 @@ const LandingPage = () => {
               <>
                 <button
                   onClick={openCandidateLogin}
-                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold text-xs transition flex items-center space-x-2"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition flex items-center space-x-2 shadow-sm"
                 >
-                  <FiAward className="text-teal-400" />
+                  <FiAward className="text-teal-600 dark:text-teal-400" />
                   <span>Candidate Sign In</span>
                 </button>
 
                 <button
                   onClick={() => openStaffLogin('admin')}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-lg shadow-cyan-600/30 transition flex items-center space-x-2"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs shadow-lg shadow-sky-600/25 transition flex items-center space-x-2"
                 >
                   <FiShield />
                   <span>Employee / Staff Portal</span>
@@ -247,23 +247,23 @@ const LandingPage = () => {
 
       {/* Hero Section */}
       <section className="relative pt-12 pb-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-sky-500/5 via-transparent to-transparent pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left Content */}
             <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-bold tracking-wide uppercase">
+              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-700 dark:text-sky-400 text-xs font-extrabold tracking-wide uppercase">
                 <span>✨ NOW HIRING DEVELOPERS & ENGINEERS</span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-none">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
                 Build Your Career with <br />
-                <span className="bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-sky-600 via-teal-500 to-indigo-600 dark:from-sky-400 dark:via-teal-300 dark:to-indigo-400 bg-clip-text text-transparent">
                   Kevalon Technology
                 </span>
               </h1>
 
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
+              <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 font-medium leading-relaxed max-w-2xl">
                 Ahmedabad thi start karo, global clients sathe kaam karo. Join a team of passionate
                 engineers building high-scale web apps, AI solutions, and cloud infrastructure for
                 international clients.
@@ -273,7 +273,7 @@ const LandingPage = () => {
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <button
                   onClick={openCandidateLogin}
-                  className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white font-extrabold text-xs tracking-wider uppercase shadow-xl shadow-teal-500/25 transition flex items-center space-x-2"
+                  className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 dark:from-teal-500 dark:to-emerald-500 hover:from-teal-500 hover:to-emerald-400 text-white font-extrabold text-xs tracking-wider uppercase shadow-xl shadow-teal-600/20 transition flex items-center space-x-2"
                 >
                   <span>Candidate Login (Enrollment + Mobile)</span>
                   <FiArrowRight className="text-base" />
@@ -281,66 +281,66 @@ const LandingPage = () => {
 
                 <button
                   onClick={() => openStaffLogin('admin')}
-                  className="px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-extrabold text-xs tracking-wider uppercase transition flex items-center space-x-2"
+                  className="px-6 py-3.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-extrabold text-xs tracking-wider uppercase shadow-md transition flex items-center space-x-2"
                 >
                   <span>Employee / Staff Portal Login</span>
-                  <FiShield className="text-base text-cyan-400" />
+                  <FiShield className="text-base text-sky-600 dark:text-sky-400" />
                 </button>
               </div>
 
               {/* Stats Bar */}
-              <div className="pt-8 border-t border-slate-800/80 grid grid-cols-3 gap-6 max-w-lg">
+              <div className="pt-8 border-t border-slate-200 dark:border-slate-800/80 grid grid-cols-3 gap-6 max-w-lg">
                 <div>
-                  <p className="text-2xl sm:text-3xl font-black text-white">10+</p>
-                  <p className="text-xs text-slate-400 font-medium">Countries Served</p>
+                  <p className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">10+</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Countries Served</p>
                 </div>
                 <div>
-                  <p className="text-2xl sm:text-3xl font-black text-cyan-400">2020</p>
-                  <p className="text-xs text-slate-400 font-medium">Founded Year</p>
+                  <p className="text-2xl sm:text-3xl font-black text-sky-600 dark:text-sky-400">2020</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Founded Year</p>
                 </div>
                 <div>
-                  <p className="text-2xl sm:text-3xl font-black text-emerald-400">100%</p>
-                  <p className="text-xs text-slate-400 font-medium">Career Growth</p>
+                  <p className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">100%</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Career Growth</p>
                 </div>
               </div>
             </div>
 
             {/* Right Widget Card */}
             <div className="lg:col-span-5">
-              <div className="bg-slate-900/90 border border-slate-800 p-6 sm:p-8 rounded-3xl shadow-2xl space-y-4 relative">
-                <div className="flex items-center space-x-3 border-b border-slate-800 pb-4">
-                  <div className="w-10 h-10 rounded-xl bg-cyan-600 flex items-center justify-center font-black text-white text-base">
+              <div className="bg-white dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 rounded-3xl shadow-2xl space-y-4 relative transition-colors">
+                <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-4">
+                  <div className="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center font-black text-white text-base shadow-md">
                     KT
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-sm">Engineering Culture</h3>
-                    <p className="text-[11px] text-slate-400">Solaris Hub, Ahmedabad</p>
+                    <h3 className="font-bold text-slate-900 dark:text-white text-sm">Engineering Culture</h3>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">Solaris Hub, Ahmedabad</p>
                   </div>
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse ml-auto" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse ml-auto" />
                 </div>
 
                 <div className="space-y-3 pt-2 text-xs">
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-start space-x-3">
-                    <FiCode className="text-cyan-400 text-lg mt-0.5 flex-shrink-0" />
+                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-start space-x-3">
+                    <FiCode className="text-sky-600 dark:text-sky-400 text-lg mt-0.5 flex-shrink-0" />
                     <div>
-                      <h4 className="font-bold text-white">Enterprise Stack Experience</h4>
-                      <p className="text-slate-400 text-[11px]">MERN, Python, Next.js, AWS Cloud</p>
+                      <h4 className="font-bold text-slate-900 dark:text-white">Enterprise Stack Experience</h4>
+                      <p className="text-slate-600 dark:text-slate-400 text-[11px]">MERN, Python, Next.js, AWS Cloud</p>
                     </div>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-start space-x-3">
-                    <FiGlobe className="text-indigo-400 text-lg mt-0.5 flex-shrink-0" />
+                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-start space-x-3">
+                    <FiGlobe className="text-indigo-600 dark:text-indigo-400 text-lg mt-0.5 flex-shrink-0" />
                     <div>
-                      <h4 className="font-bold text-white">Global Client Interaction</h4>
-                      <p className="text-slate-400 text-[11px]">USA, UK, Australia, Middle East Projects</p>
+                      <h4 className="font-bold text-slate-900 dark:text-white">Global Client Interaction</h4>
+                      <p className="text-slate-600 dark:text-slate-400 text-[11px]">USA, UK, Australia, Middle East Projects</p>
                     </div>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-start space-x-3">
-                    <FiAward className="text-amber-400 text-lg mt-0.5 flex-shrink-0" />
+                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-start space-x-3">
+                    <FiAward className="text-amber-600 dark:text-amber-400 text-lg mt-0.5 flex-shrink-0" />
                     <div>
-                      <h4 className="font-bold text-white">Performance Appraisals</h4>
-                      <p className="text-slate-400 text-[11px]">Bi-annual reviews & promotions</p>
+                      <h4 className="font-bold text-slate-900 dark:text-white">Performance Appraisals</h4>
+                      <p className="text-slate-600 dark:text-slate-400 text-[11px]">Bi-annual reviews & promotions</p>
                     </div>
                   </div>
                 </div>
@@ -351,16 +351,16 @@ const LandingPage = () => {
       </section>
 
       {/* Role Panels Selector Section */}
-      <section id="panels" className="py-16 bg-slate-900/50 border-t border-slate-800">
+      <section id="panels" className="py-16 bg-slate-100/80 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-cyan-400">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-sky-600 dark:text-sky-400">
               Role-Based Access System
             </span>
-            <h2 className="text-3xl font-black text-white tracking-tight">
+            <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
               Select Your Access Portal
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-600 dark:text-slate-400">
               Click on any role panel card below to instantly sign in with your credentials.
             </p>
           </div>
@@ -374,29 +374,29 @@ const LandingPage = () => {
                   onClick={() =>
                     role.isCandidate ? openCandidateLogin() : openStaffLogin(role.id)
                   }
-                  className={`bg-slate-900 border rounded-2xl p-6 hover:scale-[1.02] cursor-pointer transition shadow-xl space-y-4 group flex flex-col justify-between ${role.color}`}
+                  className={`bg-white dark:bg-slate-900 border rounded-2xl p-6 hover:scale-[1.02] cursor-pointer transition shadow-lg hover:shadow-2xl space-y-4 group flex flex-col justify-between ${role.color}`}
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="w-11 h-11 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-xl">
+                      <div className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-xl">
                         <Icon />
                       </div>
-                      <span className="px-2.5 py-0.5 rounded-full bg-slate-950 border text-[10px] font-extrabold uppercase tracking-wider">
+                      <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[10px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                         {role.badge}
                       </span>
                     </div>
 
                     <div>
-                      <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition">
+                      <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-300 transition">
                         {role.title}
                       </h3>
-                      <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
                         {role.description}
                       </p>
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs font-bold text-slate-300 group-hover:text-white">
+                  <div className="pt-3 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:text-sky-600 dark:group-hover:text-white">
                     <span>Login to {role.title}</span>
                     <FiChevronRight className="text-base group-hover:translate-x-1 transition" />
                   </div>
@@ -408,10 +408,9 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="mt-auto py-8 bg-slate-950 border-t border-slate-800 text-center text-xs text-slate-500 space-y-2">
+      <footer className="mt-auto py-8 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 transition-colors space-y-2">
         <div className="flex items-center justify-center space-x-2">
-          <img src="/kevalon-logo.svg" alt="Logo" className="h-6 w-auto opacity-70" />
-          <span className="font-bold text-slate-400">Kevalon Technology Management System</span>
+          <KevalonLogo className="h-6 w-auto" />
         </div>
         <p>© {new Date().getFullYear()} Kevalon Technology. All rights reserved.</p>
       </footer>
@@ -425,13 +424,13 @@ const LandingPage = () => {
       >
         <div className="space-y-6">
           {/* Tab Switcher */}
-          <div className="flex rounded-xl bg-slate-950 p-1 border border-slate-800">
+          <div className="flex rounded-xl bg-slate-100 dark:bg-slate-950 p-1 border border-slate-200 dark:border-slate-800">
             <button
               onClick={() => setActiveTab('staff')}
               className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition ${
                 activeTab === 'staff'
                   ? 'bg-indigo-600 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Employee / Staff Login
@@ -441,7 +440,7 @@ const LandingPage = () => {
               className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition ${
                 activeTab === 'candidate'
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Candidate Login
@@ -453,7 +452,7 @@ const LandingPage = () => {
             <form onSubmit={handleStaffSubmit} className="space-y-4">
               {/* Role Pills Selector */}
               <div>
-                <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">
+                <label className="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
                   Select Role Panel
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -472,7 +471,7 @@ const LandingPage = () => {
                       className={`py-2 px-3 rounded-xl text-xs font-bold border transition ${
                         selectedRole === r.id
                           ? 'bg-indigo-600 border-indigo-500 text-white shadow-md'
-                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
+                          : 'bg-slate-100 dark:bg-slate-950 border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                       }`}
                     >
                       {r.label}
@@ -483,36 +482,36 @@ const LandingPage = () => {
 
               {/* Email */}
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Email Address
                 </label>
                 <div className="relative">
-                  <FiMail className="absolute left-3.5 top-3.5 text-slate-500 text-base" />
+                  <FiMail className="absolute left-3.5 top-3.5 text-slate-400 text-base" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="e.g. admin@kevalon.in"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
               </div>
 
               {/* Password */}
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Password
                 </label>
                 <div className="relative">
-                  <FiLock className="absolute left-3.5 top-3.5 text-slate-500 text-base" />
+                  <FiLock className="absolute left-3.5 top-3.5 text-slate-400 text-base" />
                   <input
                     type="password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
               </div>
@@ -531,42 +530,42 @@ const LandingPage = () => {
           {/* Tab 2: Candidate Login (Enrollment Number + Mobile Number) */}
           {activeTab === 'candidate' && (
             <form onSubmit={handleCandidateSubmit} className="space-y-4">
-              <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+              <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
                 ℹ Candidate credentials require Enrollment Number & Registered Mobile Number.
               </div>
 
               {/* Enrollment Number */}
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Enrollment Number
                 </label>
                 <div className="relative">
-                  <FiHash className="absolute left-3.5 top-3.5 text-slate-500 text-base" />
+                  <FiHash className="absolute left-3.5 top-3.5 text-slate-400 text-base" />
                   <input
                     type="text"
                     required
                     value={enrollmentNumber}
                     onChange={(e) => setEnrollmentNumber(e.target.value.toUpperCase())}
                     placeholder="e.g. KT202600001"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-emerald-400 placeholder-slate-600 uppercase font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl text-xs font-bold text-emerald-600 dark:text-emerald-400 placeholder-slate-400 uppercase font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               </div>
 
               {/* Mobile Number */}
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Registered Mobile Number
                 </label>
                 <div className="relative">
-                  <FiPhone className="absolute left-3.5 top-3.5 text-slate-500 text-base" />
+                  <FiPhone className="absolute left-3.5 top-3.5 text-slate-400 text-base" />
                   <input
                     type="tel"
                     required
                     value={mobileNumber}
                     onChange={(e) => setMobileNumber(e.target.value)}
                     placeholder="e.g. 9876543210"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
                   />
                 </div>
               </div>
