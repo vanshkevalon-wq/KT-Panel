@@ -35,6 +35,8 @@ app.use('/api/questions', require('./routes/pdfRoutes'));
 app.use('/api/assessments', require('./routes/assessmentRoutes'));
 app.use('/api/results', require('./routes/resultRoutes'));
 app.use('/api/activity-logs', require('./routes/activityLogRoutes'));
+app.use('/api/public', require('./routes/publicRoutes'));
+app.use('/api/admin', require('./routes/inquiryRoutes'));
 
 // Root endpoint
 app.get('/', (req, res) => {

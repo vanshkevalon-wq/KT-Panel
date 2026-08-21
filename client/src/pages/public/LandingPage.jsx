@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth, ROLE_REDIRECTS } from '../../context/AuthContext';
+import API from '../../services/api';
 import Modal from '../../components/common/Modal';
 import ThemeToggle from '../../components/common/ThemeToggle';
 import KevalonLogo from '../../components/common/KevalonLogo';
@@ -50,6 +51,15 @@ const LandingPage = () => {
   );
   const [selectedRole, setSelectedRole] = useState(searchParams.get('role') || 'admin');
 
+  // Job Application Modal State
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [applyName, setApplyName] = useState('');
+  const [applyEmail, setApplyEmail] = useState('');
+  const [applyPhone, setApplyPhone] = useState('');
+  const [applyNotes, setApplyNotes] = useState('');
+  const [applySubmitting, setApplySubmitting] = useState(false);
+
   // Open Positions Filter State
   const [positionFilter, setPositionFilter] = useState('All');
 
@@ -88,6 +98,15 @@ const LandingPage = () => {
     setActiveTab('staff');
     setIsLoginModalOpen(true);
     setMobileMenuOpen(false);
+  };
+
+  const openApplyModal = (job) => {
+    setSelectedJob(job);
+    setApplyName('');
+    setApplyEmail('');
+    setApplyPhone('');
+    setApplyNotes('');
+    setIsApplyModalOpen(true);
   };
 
   // Handle Candidate Login Submit
@@ -138,7 +157,7 @@ const LandingPage = () => {
   };
 
   // Handle Contact HR Submit
-  const handleContactSubmit = (e) => {
+  const handleContactSubmit = async (e) => {
     e.preventDefault();
     if (!contactName || !contactEmail || !contactMessage) {
       showToast('Please fill out all required contact fields.', 'error');
@@ -146,15 +165,53 @@ const LandingPage = () => {
     }
 
     setContactSubmitting(true);
-    setTimeout(() => {
-      showToast('Thank you! Your message has been sent to Kevalon HR team.', 'success');
+    try {
+      const res = await API.post('/public/contact', {
+        name: contactName,
+        email: contactEmail,
+        phone: contactPhone,
+        subject: contactSubject,
+        message: contactMessage,
+      });
+      showToast(res.data.message || 'Thank you! Your message has been sent to Kevalon HR team.', 'success');
       setContactName('');
       setContactEmail('');
       setContactPhone('');
       setContactSubject('');
       setContactMessage('');
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to send message. Please try again.', 'error');
+    } finally {
       setContactSubmitting(false);
-    }, 1000);
+    }
+  };
+
+  // Handle Quick Job Application Submit
+  const handleApplySubmit = async (e) => {
+    e.preventDefault();
+    if (!applyName || !applyEmail || !applyPhone) {
+      showToast('Name, email, and phone number are required.', 'error');
+      return;
+    }
+
+    setApplySubmitting(true);
+    try {
+      const res = await API.post('/public/apply', {
+        name: applyName,
+        email: applyEmail,
+        phone: applyPhone,
+        position: selectedJob?.title || 'Software Engineer',
+        department: selectedJob?.department || 'Engineering',
+        experience: selectedJob?.experience || '',
+        notes: applyNotes,
+      });
+      showToast(res.data.message || 'Application submitted successfully!', 'success');
+      setIsApplyModalOpen(false);
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to submit application.', 'error');
+    } finally {
+      setApplySubmitting(false);
+    }
   };
 
   const rolesConfig = [
@@ -669,10 +726,10 @@ const LandingPage = () => {
 
                 <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
                   <button
-                    onClick={openCandidateLogin}
+                    onClick={() => openApplyModal(job)}
                     className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-sky-600/20 transition flex items-center justify-center space-x-2"
                   >
-                    <span>Apply / Sign In to Portal</span>
+                    <span>Apply for Position</span>
                     <FiArrowRight />
                   </button>
                 </div>
@@ -863,7 +920,7 @@ const LandingPage = () => {
                   <div>
                     <h4 className="font-bold text-slate-900 dark:text-white">Headquarters Address</h4>
                     <p className="text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
-                      Kevalon Technology, Solaris Hub, SG Highway, Ahmedabad, Gujarat 380054
+                      Solaris Business Hub, 913, Sola Rd, opp. The National Higher Secondary School, Vardhmannagar Society, C.P. Nagar-1, Naranpura, Ahmedabad, Gujarat 380063
                     </p>
                   </div>
                 </div>
@@ -871,9 +928,9 @@ const LandingPage = () => {
                 <div className="flex items-start space-x-3 p-3.5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                   <FiMail className="text-sky-500 text-lg mt-0.5 flex-shrink-0" />
                   <div>
-                    <h4 className="font-bold text-slate-900 dark:text-white">Careers Email</h4>
-                    <p className="text-slate-600 dark:text-slate-400 mt-0.5">careers@kevalontechnology.in</p>
-                    <p className="text-slate-600 dark:text-slate-400">hr@kevalon.in</p>
+                    <h4 className="font-bold text-slate-900 dark:text-white">Career Emails</h4>
+                    <p className="text-slate-600 dark:text-slate-400 mt-0.5">sales@kevalontechnology.in</p>
+                    <p className="text-slate-600 dark:text-slate-400">hr@kevalontechnology.in</p>
                   </div>
                 </div>
 
@@ -881,7 +938,7 @@ const LandingPage = () => {
                   <FiPhone className="text-emerald-500 text-lg mt-0.5 flex-shrink-0" />
                   <div>
                     <h4 className="font-bold text-slate-900 dark:text-white">HR Desk Phone</h4>
-                    <p className="text-slate-600 dark:text-slate-400 mt-0.5">+91 98765 43210 / +91 79 4000 1234</p>
+                    <p className="text-slate-600 dark:text-slate-400 mt-0.5">+91 90810 12218 / +91 91040 12218</p>
                   </div>
                 </div>
 
@@ -889,7 +946,7 @@ const LandingPage = () => {
                   <FiClock className="text-amber-500 text-lg mt-0.5 flex-shrink-0" />
                   <div>
                     <h4 className="font-bold text-slate-900 dark:text-white">Office Timings</h4>
-                    <p className="text-slate-600 dark:text-slate-400 mt-0.5">Monday – Friday: 9:30 AM – 6:30 PM</p>
+                    <p className="text-slate-600 dark:text-slate-400 mt-0.5">Monday – Saturday: 10:00 AM – 7:00 PM</p>
                   </div>
                 </div>
               </div>
@@ -941,7 +998,7 @@ const LandingPage = () => {
                       type="tel"
                       value={contactPhone}
                       onChange={(e) => setContactPhone(e.target.value)}
-                      placeholder="9876543210"
+                      placeholder="9081012218"
                       className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 font-semibold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
@@ -995,6 +1052,93 @@ const LandingPage = () => {
         </div>
         <p>© {new Date().getFullYear()} Kevalon Technology. All rights reserved.</p>
       </footer>
+
+      {/* Quick Job Application Modal */}
+      <Modal
+        isOpen={isApplyModalOpen}
+        onClose={() => setIsApplyModalOpen(false)}
+        title={`Apply for Position: ${selectedJob?.title || 'Open Position'}`}
+        maxWidth="max-w-lg"
+      >
+        <form onSubmit={handleApplySubmit} className="space-y-4 text-xs">
+          <div className="p-3.5 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-700 dark:text-sky-400 font-semibold">
+            📋 Submit your application details below. Our HR team will review and contact you!
+          </div>
+
+          <div>
+            <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              Full Name *
+            </label>
+            <input
+              type="text"
+              required
+              value={applyName}
+              onChange={(e) => setApplyName(e.target.value)}
+              placeholder="e.g. Rahul Patel"
+              className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+            />
+          </div>
+
+          <div>
+            <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              Email Address *
+            </label>
+            <input
+              type="email"
+              required
+              value={applyEmail}
+              onChange={(e) => setApplyEmail(e.target.value)}
+              placeholder="rahul@example.com"
+              className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+            />
+          </div>
+
+          <div>
+            <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              Mobile Number *
+            </label>
+            <input
+              type="tel"
+              required
+              value={applyPhone}
+              onChange={(e) => setApplyPhone(e.target.value)}
+              placeholder="9081012218"
+              className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+            />
+          </div>
+
+          <div>
+            <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              Additional Experience / Qualifications / Portfolio Link
+            </label>
+            <textarea
+              rows="3"
+              value={applyNotes}
+              onChange={(e) => setApplyNotes(e.target.value)}
+              placeholder="Briefly describe your experience or share links..."
+              className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+            />
+          </div>
+
+          <div className="pt-2 flex justify-end space-x-3 border-t border-slate-200 dark:border-slate-800">
+            <button
+              type="button"
+              onClick={() => setIsApplyModalOpen(false)}
+              className="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={applySubmitting}
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold uppercase tracking-wider shadow-lg shadow-sky-600/30 transition flex items-center space-x-2 disabled:opacity-50"
+            >
+              <FiSend />
+              <span>{applySubmitting ? 'Submitting...' : 'Submit Application'}</span>
+            </button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Unified Login Modal */}
       <Modal

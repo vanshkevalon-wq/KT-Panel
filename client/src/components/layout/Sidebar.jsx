@@ -20,12 +20,16 @@ import {
   FiLayers,
   FiPieChart,
   FiBell,
+  FiMail,
+  FiBriefcase,
 } from 'react-icons/fi';
 
 const navMenus = {
   admin: [
     { label: 'Dashboard', path: '/admin/dashboard', icon: FiGrid },
     { label: 'Notifications', path: '/admin/notifications', icon: FiBell },
+    { label: 'Contact Inquiries', path: '/admin/contact-inquiries', icon: FiMail },
+    { label: 'Job Applications', path: '/admin/job-applications', icon: FiBriefcase },
     { label: 'Users', path: '/admin/users', icon: FiUsers },
     { label: 'Reception Desk / Verification', path: '/admin/receptionists', icon: FiUserCheck },
     { label: 'Employee Management', path: '/admin/employees', icon: FiUserCheck },

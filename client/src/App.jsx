@@ -25,6 +25,8 @@ import ActivityLogs from './pages/admin/ActivityLogs';
 import Settings from './pages/admin/Settings';
 import Profile from './pages/admin/Profile';
 import Notifications from './pages/Notifications';
+import ContactInquiries from './pages/admin/ContactInquiries';
+import JobApplications from './pages/admin/JobApplications';
 
 // HR Pages
 import HRDashboard from './pages/hr/Dashboard';
@@ -92,6 +94,8 @@ function AppRoutes() {
       >
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="notifications" element={<Notifications />} />
+        <Route path="contact-inquiries" element={<ContactInquiries />} />
+        <Route path="job-applications" element={<JobApplications />} />
         <Route path="users" element={<Users />} />
         <Route path="receptionists" element={<Receptionists />} />
         <Route path="employees" element={<Employees />} />
