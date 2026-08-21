@@ -93,7 +93,10 @@ const completeInterviewHandler = async (req, res, next) => {
 const getCandidateQueue = async (req, res, next) => {
   try {
     const { role, status, employeeId, search } = req.query;
-    const query = {};
+    const query = {
+      // Exclude unverified registered candidates from Candidate Queue until Receptionist check-in!
+      applicationStatus: { $in: ['verified', 'waiting', 'assigned', 'ongoing', 'completed'] },
+    };
 
     if (role && role !== 'all') {
       query.requiredRole = { $regex: role, $options: 'i' };
@@ -112,6 +115,7 @@ const getCandidateQueue = async (req, res, next) => {
         { name: { $regex: search, $options: 'i' } },
         { email: { $regex: search, $options: 'i' } },
         { position: { $regex: search, $options: 'i' } },
+        { enrollmentNumber: { $regex: search, $options: 'i' } },
       ];
     }
 
@@ -120,8 +124,14 @@ const getCandidateQueue = async (req, res, next) => {
       .sort({ createdAt: -1 });
 
     const stats = {
-      waiting: await Candidate.countDocuments({ assignmentStatus: 'waiting' }),
-      assigned: await Candidate.countDocuments({ assignmentStatus: 'assigned' }),
+      waiting: await Candidate.countDocuments({
+        assignmentStatus: 'waiting',
+        applicationStatus: { $in: ['verified', 'waiting'] },
+      }),
+      assigned: await Candidate.countDocuments({
+        assignmentStatus: 'assigned',
+        applicationStatus: { $in: ['verified', 'waiting', 'assigned'] },
+      }),
       ongoing: await Candidate.countDocuments({ assignmentStatus: 'ongoing' }),
       completed: await Candidate.countDocuments({ assignmentStatus: { $in: ['passed', 'failed', 'on_hold'] } }),
       onHold: await Candidate.countDocuments({ assignmentStatus: 'on_hold' }),

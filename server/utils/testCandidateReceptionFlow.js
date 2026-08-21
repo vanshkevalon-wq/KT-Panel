@@ -69,7 +69,7 @@ const runCandidateReceptionTest = async () => {
       requiredRole: 'uiux',
       department: 'Design',
       applicationStatus: 'registered',
-      assignmentStatus: 'waiting',
+      assignmentStatus: 'unverified',
       status: 'active',
     });
     console.log('✔ Step 2: Admin created Candidate: John Patel (Enrollment: KT202600001, Mobile: 9876543210, Role: UI/UX)');
@@ -95,6 +95,7 @@ const runCandidateReceptionTest = async () => {
 
     // Receptionist clicks "Candidate Is Here"
     searchedCandidate.applicationStatus = 'verified';
+    searchedCandidate.assignmentStatus = 'waiting';
     searchedCandidate.verifiedAt = new Date();
     searchedCandidate.verifiedBy = receptionist._id;
     await searchedCandidate.save();

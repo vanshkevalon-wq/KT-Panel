@@ -269,7 +269,7 @@ const createCandidate = async (req, res, next) => {
       status: status || 'active',
       applicationStatus: 'registered',
       interviewStatus: 'waiting',
-      assignmentStatus: 'waiting',
+      assignmentStatus: 'unverified',
       gender,
       dob,
       education,

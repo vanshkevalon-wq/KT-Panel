@@ -80,8 +80,8 @@ const candidateSchema = new mongoose.Schema(
     },
     assignmentStatus: {
       type: String,
-      enum: ['waiting', 'assigned', 'ongoing', 'completed', 'passed', 'failed', 'on_hold'],
-      default: 'waiting',
+      enum: ['unverified', 'waiting', 'assigned', 'ongoing', 'completed', 'passed', 'failed', 'on_hold'],
+      default: 'unverified',
     },
     status: {
       type: String,

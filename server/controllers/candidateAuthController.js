@@ -125,7 +125,17 @@ const getCandidateDashboard = async (req, res, next) => {
       await candidate.save();
     }
 
-    // Build timeline steps
+    // Fetch assigned/completed interview if exists
+    const activeInterview = await Interview.findOne({
+      candidate: candidate._id,
+    }).sort({ createdAt: -1 });
+
+    const isVerified = Boolean(candidate.verifiedAt) || ['verified', 'assigned', 'ongoing', 'completed'].includes(candidate.applicationStatus);
+    const isAssigned = Boolean(candidate.assignedEmployee) || ['assigned', 'ongoing', 'completed'].includes(candidate.applicationStatus);
+    const isCompleted = candidate.applicationStatus === 'completed' || (completedInterview && completedInterview.status === 'completed');
+    const isResultPublished = candidate.resultPublished && candidate.result !== 'none';
+
+    // Build step-by-step timeline steps
     const timeline = [
       {
         key: 'registered',
@@ -137,40 +147,42 @@ const getCandidateDashboard = async (req, res, next) => {
       {
         key: 'verified',
         title: 'Candidate Verified',
-        description: candidate.verifiedAt
+        description: isVerified
           ? 'Checked in & verified at Reception Desk.'
-          : 'Awaiting reception check-in.',
-        isCompleted: ['verified', 'waiting', 'assigned', 'ongoing', 'completed'].includes(
-          candidate.applicationStatus
-        ) || Boolean(candidate.verifiedAt),
+          : 'Awaiting physical reception check-in.',
+        isCompleted: isVerified,
         date: candidate.verifiedAt || null,
       },
       {
         key: 'assigned',
         title: 'Interview Assigned',
-        description: ['assigned', 'ongoing', 'completed'].includes(candidate.applicationStatus)
+        description: isAssigned
           ? 'Skill-matched employee assigned for evaluation.'
-          : 'Waiting in load-balanced queue for available employee.',
-        isCompleted: ['assigned', 'ongoing', 'completed'].includes(candidate.applicationStatus),
-        date: null,
+          : isVerified
+          ? 'Waiting in queue for matching employee availability.'
+          : 'Pending reception verification.',
+        isCompleted: isAssigned,
+        date: activeInterview ? activeInterview.assignedAt : null,
       },
       {
         key: 'ongoing',
         title: 'Interview Completed',
-        description: candidate.applicationStatus === 'completed'
-          ? 'Interview session finished.'
-          : 'Interview pending or in progress.',
-        isCompleted: candidate.applicationStatus === 'completed',
-        date: completedInterview ? completedInterview.completedAt : null,
+        description: isCompleted
+          ? 'Interview session finished & evaluated.'
+          : isAssigned
+          ? 'Interview session in progress.'
+          : 'Awaiting interview assignment.',
+        isCompleted: isCompleted,
+        date: completedInterview ? completedInterview.completedAt : activeInterview && activeInterview.startedAt ? activeInterview.startedAt : null,
       },
       {
         key: 'result',
         title: 'Result Published',
-        description: candidate.result !== 'none' && candidate.resultPublished
+        description: isResultPublished
           ? 'Interview evaluation result finalized.'
           : 'Result pending evaluation review.',
-        isCompleted: candidate.result !== 'none' && candidate.resultPublished,
-        date: candidate.updatedAt,
+        isCompleted: isResultPublished,
+        date: isResultPublished ? candidate.updatedAt : null,
       },
     ];
 

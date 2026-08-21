@@ -112,16 +112,21 @@ const verifyCandidatePresence = async (req, res, next) => {
     const candidateId = req.params.id;
     const receptionistId = req.user._id;
 
-    const candidate = await Candidate.findById(candidateId);
+    const candidate = await Candidate.findById(candidateId).populate('assignedEmployee', 'name email employeeRoles availabilityStatus');
     if (!candidate) {
       return res.status(404).json({ message: 'Candidate record not found.' });
     }
 
     if (candidate.applicationStatus === 'verified' && candidate.verifiedAt) {
-      return res.status(400).json({ message: 'Candidate is already verified and checked in.' });
+      return res.json({
+        message: `Candidate '${candidate.name}' is already checked in at reception.`,
+        candidate,
+        isAssigned: Boolean(candidate.assignedEmployee),
+        assignedEmployee: candidate.assignedEmployee ? candidate.assignedEmployee.name : null,
+      });
     }
 
-    // Update candidate status
+    // Update candidate status upon physical check-in
     candidate.applicationStatus = 'verified';
     candidate.interviewStatus = 'waiting';
     candidate.assignmentStatus = 'waiting';
@@ -155,12 +160,13 @@ const verifyCandidatePresence = async (req, res, next) => {
     }
 
     const isAssigned = Boolean(assignmentResult && assignmentResult.candidate);
+    const updatedCandidate = await Candidate.findById(candidate._id).populate('assignedEmployee', 'name email');
 
     res.json({
       message: isAssigned
-        ? `Candidate verified successfully and assigned to employee ${assignmentResult.employee.name}.`
-        : 'Candidate verified successfully and placed in waiting queue for available employee.',
-      candidate,
+        ? `Candidate '${candidate.name}' verified & automatically assigned to employee ${assignmentResult.employee.name}!`
+        : `Candidate '${candidate.name}' verified & added to Candidate Queue for matching employee availability.`,
+      candidate: updatedCandidate,
       isAssigned,
       assignedEmployee: isAssigned ? assignmentResult.employee.name : null,
     });
