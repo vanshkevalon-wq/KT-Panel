@@ -207,8 +207,10 @@ const getWaitingQueue = async (req, res, next) => {
 // @access  Private (Receptionist, Admin)
 const getCheckInHistory = async (req, res, next) => {
   try {
-    const history = await CheckIn.find({ receptionist: req.user._id })
+    const filter = req.user.role === 'admin' ? {} : { receptionist: req.user._id };
+    const history = await CheckIn.find(filter)
       .populate('candidate', 'name enrollmentNumber mobileNumber requiredRole position applicationStatus assignmentStatus')
+      .populate('receptionist', 'name email')
       .sort({ verifiedAt: -1 });
 
     res.json(history);

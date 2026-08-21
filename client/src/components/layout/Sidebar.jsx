@@ -27,7 +27,7 @@ const navMenus = {
     { label: 'Dashboard', path: '/admin/dashboard', icon: FiGrid },
     { label: 'Notifications', path: '/admin/notifications', icon: FiBell },
     { label: 'Users', path: '/admin/users', icon: FiUsers },
-    { label: 'Receptionists', path: '/admin/receptionists', icon: FiUserCheck },
+    { label: 'Reception Desk / Verification', path: '/admin/receptionists', icon: FiUserCheck },
     { label: 'Employee Management', path: '/admin/employees', icon: FiUserCheck },
     { label: 'Skill Master', path: '/admin/skills', icon: FiLayers },
     { label: 'Candidate Queue', path: '/admin/candidate-queue', icon: FiActivity },

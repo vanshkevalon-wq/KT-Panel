@@ -130,14 +130,6 @@ const LandingPage = () => {
       color: 'border-indigo-500/30 text-indigo-600 dark:text-indigo-400',
     },
     {
-      id: 'receptionist',
-      title: 'Receptionist Desk',
-      description: 'Candidate check-in verification, physical presence & queue trigger.',
-      icon: FiUserCheck,
-      badge: 'Email + Password',
-      color: 'border-purple-500/30 text-purple-600 dark:text-purple-400',
-    },
-    {
       id: 'employee',
       title: 'Employee Panel',
       description: 'Skill-matched interview assignments, evaluation & grading.',
@@ -459,7 +451,6 @@ const LandingPage = () => {
                   {[
                     { id: 'admin', label: 'Admin' },
                     { id: 'hr', label: 'HR' },
-                    { id: 'receptionist', label: 'Receptionist' },
                     { id: 'employee', label: 'Employee' },
                     { id: 'theory', label: 'Theory' },
                     { id: 'practical', label: 'Practical' },
