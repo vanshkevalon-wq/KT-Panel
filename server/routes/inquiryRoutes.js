@@ -8,6 +8,12 @@ const {
   updateJobApplicationStatus,
   deleteJobApplication,
 } = require('../controllers/inquiryController');
+const {
+  getAllJobOpenings,
+  createJobOpening,
+  updateJobOpening,
+  deleteJobOpening,
+} = require('../controllers/jobOpeningController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
 
@@ -23,5 +29,11 @@ router.delete('/inquiries/:id', authorizeRoles('admin'), deleteInquiry);
 router.get('/job-applications', getJobApplications);
 router.put('/job-applications/:id/status', updateJobApplicationStatus);
 router.delete('/job-applications/:id', authorizeRoles('admin'), deleteJobApplication);
+
+// Job Openings Management
+router.get('/job-openings', getAllJobOpenings);
+router.post('/job-openings', createJobOpening);
+router.put('/job-openings/:id', updateJobOpening);
+router.delete('/job-openings/:id', authorizeRoles('admin'), deleteJobOpening);
 
 module.exports = router;

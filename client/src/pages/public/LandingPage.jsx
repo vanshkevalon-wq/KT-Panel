@@ -266,9 +266,9 @@ const LandingPage = () => {
     },
   ];
 
-  const jobOpenings = [
+  const [jobOpenings, setJobOpenings] = useState([
     {
-      id: 1,
+      _id: '1',
       title: 'Senior Full Stack Developer (Node.js + React)',
       category: 'Full Stack',
       department: 'Engineering',
@@ -278,7 +278,7 @@ const LandingPage = () => {
       tags: ['React.js', 'Node.js', 'MongoDB', 'AWS', 'Tailwind CSS'],
     },
     {
-      id: 2,
+      _id: '2',
       title: 'Frontend Engineer (React & Next.js)',
       category: 'Frontend',
       department: 'Web Development',
@@ -288,7 +288,7 @@ const LandingPage = () => {
       tags: ['React.js', 'Next.js', 'TypeScript', 'Tailwind'],
     },
     {
-      id: 3,
+      _id: '3',
       title: 'Python / AI Backend Engineer',
       category: 'Backend',
       department: 'AI & Data Labs',
@@ -298,7 +298,7 @@ const LandingPage = () => {
       tags: ['Python', 'FastAPI', 'PostgreSQL', 'Docker', 'Generative AI'],
     },
     {
-      id: 4,
+      _id: '4',
       title: 'Quality Assurance & Test Automation Engineer',
       category: 'QA',
       department: 'Quality Assurance',
@@ -308,7 +308,7 @@ const LandingPage = () => {
       tags: ['Cypress', 'Playwright', 'Jest', 'API Testing'],
     },
     {
-      id: 5,
+      _id: '5',
       title: 'UI/UX Product Designer',
       category: 'Design',
       department: 'Product & Design',
@@ -317,7 +317,23 @@ const LandingPage = () => {
       type: 'Full-Time',
       tags: ['Figma', 'User Research', 'Prototyping', 'Design Systems'],
     },
-  ];
+  ]);
+
+  useEffect(() => {
+    const fetchPublicJobOpenings = async () => {
+      try {
+        const res = await API.get('/public/job-openings');
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          setJobOpenings(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch public job openings:', err);
+      }
+    };
+    fetchPublicJobOpenings();
+  }, []);
+
+  const categories = ['All', ...Array.from(new Set(jobOpenings.map((j) => j.category || 'Other')))];
 
   const filteredJobs = positionFilter === 'All'
     ? jobOpenings
@@ -664,7 +680,7 @@ const LandingPage = () => {
 
           {/* Filter Pills */}
           <div className="flex flex-wrap items-center justify-center gap-2">
-            {['All', 'Full Stack', 'Frontend', 'Backend', 'QA', 'Design'].map((cat) => (
+            {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setPositionFilter(cat)}
@@ -683,7 +699,7 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filteredJobs.map((job) => (
               <div
-                key={job.id}
+                key={job._id || job.id}
                 className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 space-y-5 hover:border-sky-500/50 transition shadow-lg flex flex-col justify-between"
               >
                 <div className="space-y-4">

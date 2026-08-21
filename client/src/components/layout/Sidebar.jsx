@@ -28,6 +28,7 @@ const navMenus = {
   admin: [
     { label: 'Dashboard', path: '/admin/dashboard', icon: FiGrid },
     { label: 'Notifications', path: '/admin/notifications', icon: FiBell },
+    { label: 'Manage Job Openings', path: '/admin/job-openings', icon: FiBriefcase },
     { label: 'Contact Inquiries', path: '/admin/contact-inquiries', icon: FiMail },
     { label: 'Job Applications', path: '/admin/job-applications', icon: FiBriefcase },
     { label: 'Users', path: '/admin/users', icon: FiUsers },

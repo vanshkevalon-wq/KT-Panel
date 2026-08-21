@@ -29,6 +29,7 @@ import Profile from './pages/admin/Profile';
 import Notifications from './pages/Notifications';
 import ContactInquiries from './pages/admin/ContactInquiries';
 import JobApplications from './pages/admin/JobApplications';
+import JobOpenings from './pages/admin/JobOpenings';
 
 // HR Pages
 import HRDashboard from './pages/hr/Dashboard';
@@ -96,6 +97,7 @@ function AppRoutes() {
       >
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="notifications" element={<Notifications />} />
+        <Route path="job-openings" element={<JobOpenings />} />
         <Route path="contact-inquiries" element={<ContactInquiries />} />
         <Route path="job-applications" element={<JobApplications />} />
         <Route path="users" element={<Users />} />
