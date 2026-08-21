@@ -17,6 +17,7 @@ import {
   FiCheckSquare,
   FiSquare,
   FiX,
+  FiAward,
 } from 'react-icons/fi';
 
 const Candidates = () => {
