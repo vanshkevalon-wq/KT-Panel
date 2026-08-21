@@ -21,12 +21,25 @@ import {
   FiGlobe,
   FiCheckCircle,
   FiChevronRight,
+  FiMapPin,
+  FiClock,
+  FiSend,
+  FiStar,
+  FiTrendingUp,
+  FiLayers,
+  FiHeart,
+  FiMenu,
+  FiX,
+  FiCheck,
 } from 'react-icons/fi';
 
 const LandingPage = () => {
   const { user, login, candidateLogin, showToast } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  // Navigation Mobile Drawer State
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Modal & Tab States
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(
@@ -37,17 +50,27 @@ const LandingPage = () => {
   );
   const [selectedRole, setSelectedRole] = useState(searchParams.get('role') || 'admin');
 
-  // Candidate Form
+  // Open Positions Filter State
+  const [positionFilter, setPositionFilter] = useState('All');
+
+  // Contact Form State
+  const [contactName, setContactName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactSubject, setContactSubject] = useState('');
+  const [contactMessage, setContactMessage] = useState('');
+  const [contactSubmitting, setContactSubmitting] = useState(false);
+
+  // Candidate Login Form
   const [enrollmentNumber, setEnrollmentNumber] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [candidateSubmitting, setCandidateSubmitting] = useState(false);
 
-  // Staff Form
+  // Staff Login Form
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [staffSubmitting, setStaffSubmitting] = useState(false);
 
-  // If user is already logged in, show quick dashboard access banner
   const handleDashboardRedirect = () => {
     if (user) {
       navigate(ROLE_REDIRECTS[user.role] || '/admin/dashboard');
@@ -57,12 +80,14 @@ const LandingPage = () => {
   const openCandidateLogin = () => {
     setActiveTab('candidate');
     setIsLoginModalOpen(true);
+    setMobileMenuOpen(false);
   };
 
   const openStaffLogin = (role = 'admin') => {
     setSelectedRole(role);
     setActiveTab('staff');
     setIsLoginModalOpen(true);
+    setMobileMenuOpen(false);
   };
 
   // Handle Candidate Login Submit
@@ -82,7 +107,7 @@ const LandingPage = () => {
       }
     } catch (err) {
       showToast(
-        'Enrollment number or mobile number is incorrect. Please check your details and try again.',
+        'Enrollment number or mobile number is incorrect. Please check details and try again.',
         'error'
       );
     } finally {
@@ -110,6 +135,26 @@ const LandingPage = () => {
     } finally {
       setStaffSubmitting(false);
     }
+  };
+
+  // Handle Contact HR Submit
+  const handleContactSubmit = (e) => {
+    e.preventDefault();
+    if (!contactName || !contactEmail || !contactMessage) {
+      showToast('Please fill out all required contact fields.', 'error');
+      return;
+    }
+
+    setContactSubmitting(true);
+    setTimeout(() => {
+      showToast('Thank you! Your message has been sent to Kevalon HR team.', 'success');
+      setContactName('');
+      setContactEmail('');
+      setContactPhone('');
+      setContactSubject('');
+      setContactMessage('');
+      setContactSubmitting(false);
+    }, 1000);
   };
 
   const rolesConfig = [
@@ -164,6 +209,129 @@ const LandingPage = () => {
     },
   ];
 
+  const jobOpenings = [
+    {
+      id: 1,
+      title: 'Senior Full Stack Developer (Node.js + React)',
+      category: 'Full Stack',
+      department: 'Engineering',
+      experience: '3 - 5 Years',
+      location: 'Ahmedabad / Hybrid',
+      type: 'Full-Time',
+      tags: ['React.js', 'Node.js', 'MongoDB', 'AWS', 'Tailwind CSS'],
+    },
+    {
+      id: 2,
+      title: 'Frontend Engineer (React & Next.js)',
+      category: 'Frontend',
+      department: 'Web Development',
+      experience: '1 - 3 Years',
+      location: 'Solaris Hub, Ahmedabad',
+      type: 'Full-Time',
+      tags: ['React.js', 'Next.js', 'TypeScript', 'Tailwind'],
+    },
+    {
+      id: 3,
+      title: 'Python / AI Backend Engineer',
+      category: 'Backend',
+      department: 'AI & Data Labs',
+      experience: '2 - 4 Years',
+      location: 'Ahmedabad / Remote',
+      type: 'Full-Time',
+      tags: ['Python', 'FastAPI', 'PostgreSQL', 'Docker', 'Generative AI'],
+    },
+    {
+      id: 4,
+      title: 'Quality Assurance & Test Automation Engineer',
+      category: 'QA',
+      department: 'Quality Assurance',
+      experience: '1 - 3 Years',
+      location: 'Solaris Hub, Ahmedabad',
+      type: 'Full-Time',
+      tags: ['Cypress', 'Playwright', 'Jest', 'API Testing'],
+    },
+    {
+      id: 5,
+      title: 'UI/UX Product Designer',
+      category: 'Design',
+      department: 'Product & Design',
+      experience: '2+ Years',
+      location: 'Solaris Hub, Ahmedabad',
+      type: 'Full-Time',
+      tags: ['Figma', 'User Research', 'Prototyping', 'Design Systems'],
+    },
+  ];
+
+  const filteredJobs = positionFilter === 'All'
+    ? jobOpenings
+    : jobOpenings.filter((job) => job.category === positionFilter);
+
+  const perksList = [
+    {
+      icon: FiGlobe,
+      title: 'Global Client Exposure',
+      description: 'Work directly on enterprise software for international clients in USA, UK, Australia & Middle East.',
+      color: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    },
+    {
+      icon: FiCode,
+      title: 'Modern Tech Stack',
+      description: 'Build with modern architectures using MERN, Next.js, Python, Docker, microservices, and AWS Cloud.',
+      color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+    },
+    {
+      icon: FiTrendingUp,
+      title: 'Fast-Track Career Growth',
+      description: 'Bi-annual performance evaluations, mentorship from senior architects, and clear promotion paths.',
+      color: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+    },
+    {
+      icon: FiStar,
+      title: 'Competitive Rewards',
+      description: 'Market-leading salaries, performance bonuses, festive incentives, and annual appraisal perks.',
+      color: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+    },
+    {
+      icon: FiHeart,
+      title: 'Work-Life Harmony',
+      description: 'Flexible working hours, supportive leadership, 5-day work week, and generous paid leave policy.',
+      color: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
+    },
+    {
+      icon: FiLayers,
+      title: 'State-of-the-Art Workspace',
+      description: 'Ergonomic workstations in Solaris Hub, SG Highway, Ahmedabad with high-speed fiber internet and coffee lounge.',
+      color: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20',
+    },
+  ];
+
+  const processSteps = [
+    {
+      step: '01',
+      title: 'Online Application & Registration',
+      description: 'Register via HR desk or candidate portal to receive your unique KT Enrollment Number.',
+      icon: FiAward,
+    },
+    {
+      step: '02',
+      title: 'Reception Check-In & Verification',
+      description: 'Arrive at Kevalon Reception Desk, verify enrollment # / mobile #, and enter physical waiting queue.',
+      icon: FiUserCheck,
+    },
+    {
+      step: '03',
+      title: 'Skill Assessment & Evaluation',
+      description: 'Complete skill-matched Theory & Practical coding evaluations assigned to expert interviewers.',
+      icon: FiCheckSquare,
+    },
+    {
+      step: '04',
+      title: 'HR Discussion & Onboarding',
+      description: 'Review performance scores, complete final HR discussion, and receive your official offer letter.',
+      icon: FiShield,
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-sky-500 selection:text-white flex flex-col transition-colors duration-300">
       {/* Header Navigation Bar */}
@@ -182,7 +350,7 @@ const LandingPage = () => {
             </div>
           </div>
 
-          {/* Nav Links */}
+          {/* Nav Links (Desktop) */}
           <nav className="hidden lg:flex items-center space-x-8 text-xs font-bold text-slate-700 dark:text-slate-300">
             <a href="#positions" className="hover:text-sky-600 dark:hover:text-white transition">
               Open Positions
@@ -203,22 +371,30 @@ const LandingPage = () => {
 
           {/* Action Buttons & Theme Toggle */}
           <div className="flex items-center space-x-3">
-            {/* Theme Toggle Button */}
             <ThemeToggle className="shadow-sm" />
+
+            {/* Mobile Hamburger Toggle Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-sky-600 transition"
+              title="Toggle Menu"
+            >
+              {mobileMenuOpen ? <FiX className="text-xl" /> : <FiMenu className="text-xl" />}
+            </button>
 
             {user ? (
               <button
                 onClick={handleDashboardRedirect}
-                className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2"
+                className="hidden sm:flex px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition items-center space-x-2"
               >
                 <FiGrid />
                 <span>Go to {user.role.toUpperCase()} Dashboard</span>
               </button>
             ) : (
-              <>
+              <div className="hidden sm:flex items-center space-x-2">
                 <button
                   onClick={openCandidateLogin}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition flex items-center space-x-2 shadow-sm"
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition flex items-center space-x-1.5 shadow-sm"
                 >
                   <FiAward className="text-teal-600 dark:text-teal-400" />
                   <span>Candidate Sign In</span>
@@ -226,15 +402,87 @@ const LandingPage = () => {
 
                 <button
                   onClick={() => openStaffLogin('admin')}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs shadow-lg shadow-sky-600/25 transition flex items-center space-x-2"
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs shadow-lg shadow-sky-600/25 transition flex items-center space-x-1.5"
                 >
                   <FiShield />
-                  <span>Employee / Staff Portal</span>
+                  <span>Staff Portal</span>
                 </button>
-              </>
+              </div>
             )}
           </div>
         </div>
+
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 px-4 py-4 space-y-3 animate-in fade-in slide-in-from-top-2">
+            <nav className="flex flex-col space-y-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <a
+                href="#positions"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-sky-600 transition"
+              >
+                Open Positions
+              </a>
+              <a
+                href="#why-us"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-sky-600 transition"
+              >
+                Why Join Us
+              </a>
+              <a
+                href="#panels"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-sky-600 transition"
+              >
+                Portal Panels
+              </a>
+              <a
+                href="#process"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-sky-600 transition"
+              >
+                Process
+              </a>
+              <a
+                href="#contact"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-sky-600 transition"
+              >
+                Contact HR
+              </a>
+            </nav>
+
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-2">
+              {user ? (
+                <button
+                  onClick={handleDashboardRedirect}
+                  className="w-full py-2.5 bg-indigo-600 text-white font-bold text-xs rounded-xl transition flex items-center justify-center space-x-2"
+                >
+                  <FiGrid />
+                  <span>Go to {user.role.toUpperCase()} Dashboard</span>
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={openCandidateLogin}
+                    className="w-full py-2.5 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-xs rounded-xl flex items-center justify-center space-x-2"
+                  >
+                    <FiAward className="text-teal-500" />
+                    <span>Candidate Sign In</span>
+                  </button>
+                  <button
+                    onClick={() => openStaffLogin('admin')}
+                    className="w-full py-2.5 bg-sky-600 text-white font-bold text-xs rounded-xl flex items-center justify-center space-x-2"
+                  >
+                    <FiShield />
+                    <span>Employee / Staff Portal</span>
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}
@@ -256,9 +504,7 @@ const LandingPage = () => {
               </h1>
 
               <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 font-medium leading-relaxed max-w-2xl">
-                Ahmedabad thi start karo, global clients sathe kaam karo. Join a team of passionate
-                engineers building high-scale web apps, AI solutions, and cloud infrastructure for
-                international clients.
+                Join a team of passionate software engineers, cloud architects, and product designers building high-scale web applications, AI solutions, and enterprise software for global clients.
               </p>
 
               {/* CTAs */}
@@ -267,17 +513,17 @@ const LandingPage = () => {
                   onClick={openCandidateLogin}
                   className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 dark:from-teal-500 dark:to-emerald-500 hover:from-teal-500 hover:to-emerald-400 text-white font-extrabold text-xs tracking-wider uppercase shadow-xl shadow-teal-600/20 transition flex items-center space-x-2"
                 >
-                  <span>Candidate Login (Enrollment + Mobile)</span>
+                  <span>Candidate Portal Sign In</span>
                   <FiArrowRight className="text-base" />
                 </button>
 
-                <button
-                  onClick={() => openStaffLogin('admin')}
+                <a
+                  href="#positions"
                   className="px-6 py-3.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-extrabold text-xs tracking-wider uppercase shadow-md transition flex items-center space-x-2"
                 >
-                  <span>Employee / Staff Portal Login</span>
-                  <FiShield className="text-base text-sky-600 dark:text-sky-400" />
-                </button>
+                  <span>View Open Positions</span>
+                  <FiBriefcase className="text-base text-sky-600 dark:text-sky-400" />
+                </a>
               </div>
 
               {/* Stats Bar */}
@@ -342,22 +588,161 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Role Panels Selector Section */}
-      <section id="panels" className="py-16 bg-slate-100/80 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800 transition-colors">
+      {/* ========================================================================= */}
+      {/* SECTION 1: OPEN POSITIONS */}
+      {/* ========================================================================= */}
+      <section id="positions" className="py-20 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 scroll-mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-sky-600 dark:text-sky-400">
-              Role-Based Access System
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-sky-600 dark:text-sky-400 bg-sky-500/10 border border-sky-500/20 px-3 py-1 rounded-full inline-block">
+              CAREER OPPORTUNITIES
             </span>
-            <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-              Select Your Access Portal
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+              Explore Open Positions
             </h2>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
-              Click on any role panel card below to instantly sign in with your credentials.
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+              Join our engineering team at Solaris Hub, Ahmedabad. Choose a role matching your skill set and apply today.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Filter Pills */}
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {['All', 'Full Stack', 'Frontend', 'Backend', 'QA', 'Design'].map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setPositionFilter(cat)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition border ${
+                  positionFilter === cat
+                    ? 'bg-sky-600 border-sky-500 text-white shadow-lg shadow-sky-600/30'
+                    : 'bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Open Positions Cards List */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredJobs.map((job) => (
+              <div
+                key={job.id}
+                className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 space-y-5 hover:border-sky-500/50 transition shadow-lg flex flex-col justify-between"
+              >
+                <div className="space-y-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <span className="text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider block">
+                        {job.department}
+                      </span>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-1">
+                        {job.title}
+                      </h3>
+                    </div>
+                    <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase flex-shrink-0">
+                      {job.type}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
+                    <span className="flex items-center space-x-1.5">
+                      <FiBriefcase className="text-sky-500" />
+                      <span>{job.experience}</span>
+                    </span>
+                    <span className="flex items-center space-x-1.5">
+                      <FiMapPin className="text-rose-500" />
+                      <span>{job.location}</span>
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {job.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[11px] font-semibold text-slate-700 dark:text-slate-300"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                  <button
+                    onClick={openCandidateLogin}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-sky-600/20 transition flex items-center justify-center space-x-2"
+                  >
+                    <span>Apply / Sign In to Portal</span>
+                    <FiArrowRight />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* SECTION 2: WHY JOIN US */}
+      {/* ========================================================================= */}
+      <section id="why-us" className="py-20 bg-slate-100/70 dark:bg-slate-900/40 border-t border-slate-200 dark:border-slate-800 scroll-mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-full inline-block">
+              LIFE AT KEVALON
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+              Why Join Kevalon Technology?
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+              We empower developers to build impactful global software products with continuous mentorship, high performance rewards, and work-life balance.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {perksList.map((perk, idx) => {
+              const Icon = perk.icon;
+              return (
+                <div
+                  key={idx}
+                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 rounded-3xl space-y-4 hover:scale-[1.02] transition shadow-lg"
+                >
+                  <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center text-xl ${perk.color}`}>
+                    <Icon />
+                  </div>
+
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    {perk.title}
+                  </h3>
+
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    {perk.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* SECTION 3: PORTAL PANELS */}
+      {/* ========================================================================= */}
+      <section id="panels" className="py-20 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 scroll-mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-sky-600 dark:text-sky-400 bg-sky-500/10 border border-sky-500/20 px-3 py-1 rounded-full inline-block">
+              ROLE-BASED ACCESS SYSTEM
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+              Select Access Portal
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+              Select your role panel card below to sign in with authorized credentials.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {rolesConfig.map((role) => {
               const Icon = role.icon;
               return (
@@ -366,14 +751,14 @@ const LandingPage = () => {
                   onClick={() =>
                     role.isCandidate ? openCandidateLogin() : openStaffLogin(role.id)
                   }
-                  className={`bg-white dark:bg-slate-900 border rounded-2xl p-6 hover:scale-[1.02] cursor-pointer transition shadow-lg hover:shadow-2xl space-y-4 group flex flex-col justify-between ${role.color}`}
+                  className={`bg-slate-50 dark:bg-slate-900 border rounded-3xl p-6 hover:scale-[1.02] cursor-pointer transition shadow-lg hover:shadow-2xl space-y-4 group flex flex-col justify-between ${role.color}`}
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-xl">
+                      <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-xl">
                         <Icon />
                       </div>
-                      <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[10px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                      <span className="px-3 py-1 rounded-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[10px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                         {role.badge}
                       </span>
                     </div>
@@ -395,6 +780,210 @@ const LandingPage = () => {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* SECTION 4: PROCESS */}
+      {/* ========================================================================= */}
+      <section id="process" className="py-20 bg-slate-100/70 dark:bg-slate-900/40 border-t border-slate-200 dark:border-slate-800 scroll-mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full inline-block">
+              RECRUITMENT PIPELINE
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+              Our 4-Step Selection Process
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+              Transparent, automated, and candidate-friendly evaluation workflow from check-in to offer letter.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {processSteps.map((step, idx) => {
+              const Icon = step.icon;
+              return (
+                <div
+                  key={idx}
+                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-3xl space-y-4 relative shadow-lg"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 flex items-center justify-center text-lg font-bold">
+                      <Icon />
+                    </div>
+                    <span className="text-2xl font-black text-slate-300 dark:text-slate-800 font-mono">
+                      {step.step}
+                    </span>
+                  </div>
+
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    {step.title}
+                  </h3>
+
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    {step.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* SECTION 5: CONTACT HR */}
+      {/* ========================================================================= */}
+      <section id="contact" className="py-20 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 scroll-mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-purple-600 dark:text-purple-400 bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full inline-block">
+              GET IN TOUCH WITH HR
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+              Contact Kevalon HR Team
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+              Have questions about career opportunities, candidate check-in, or interview process? Send a direct message to HR.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Contact Details Card */}
+            <div className="lg:col-span-5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 rounded-3xl space-y-6 shadow-xl">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                <FiMail className="text-purple-500" />
+                <span>HR Office Contact Info</span>
+              </h3>
+
+              <div className="space-y-4 text-xs">
+                <div className="flex items-start space-x-3 p-3.5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                  <FiMapPin className="text-rose-500 text-lg mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white">Headquarters Address</h4>
+                    <p className="text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
+                      Kevalon Technology, Solaris Hub, SG Highway, Ahmedabad, Gujarat 380054
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3 p-3.5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                  <FiMail className="text-sky-500 text-lg mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white">Careers Email</h4>
+                    <p className="text-slate-600 dark:text-slate-400 mt-0.5">careers@kevalontechnology.in</p>
+                    <p className="text-slate-600 dark:text-slate-400">hr@kevalon.in</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3 p-3.5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                  <FiPhone className="text-emerald-500 text-lg mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white">HR Desk Phone</h4>
+                    <p className="text-slate-600 dark:text-slate-400 mt-0.5">+91 98765 43210 / +91 79 4000 1234</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3 p-3.5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                  <FiClock className="text-amber-500 text-lg mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white">Office Timings</h4>
+                    <p className="text-slate-600 dark:text-slate-400 mt-0.5">Monday – Friday: 9:30 AM – 6:30 PM</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Interactive Contact Form */}
+            <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 rounded-3xl shadow-xl space-y-4">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                Send Direct Message
+              </h3>
+
+              <form onSubmit={handleContactSubmit} className="space-y-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={contactName}
+                      onChange={(e) => setContactName(e.target.value)}
+                      placeholder="e.g. Rahul Patel"
+                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 font-semibold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
+                      placeholder="rahul@example.com"
+                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 font-semibold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                      Mobile Number
+                    </label>
+                    <input
+                      type="tel"
+                      value={contactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
+                      placeholder="9876543210"
+                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 font-semibold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                      Subject
+                    </label>
+                    <input
+                      type="text"
+                      value={contactSubject}
+                      onChange={(e) => setContactSubject(e.target.value)}
+                      placeholder="e.g. Job Application Query"
+                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 font-semibold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    Your Message *
+                  </label>
+                  <textarea
+                    rows="4"
+                    required
+                    value={contactMessage}
+                    onChange={(e) => setContactMessage(e.target.value)}
+                    placeholder="Type your message here..."
+                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 font-semibold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={contactSubmitting}
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-purple-600/30 transition flex items-center justify-center space-x-2 disabled:opacity-50"
+                >
+                  <FiSend />
+                  <span>{contactSubmitting ? 'Sending Message...' : 'Send Message to HR'}</span>
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </section>
@@ -439,10 +1028,9 @@ const LandingPage = () => {
             </button>
           </div>
 
-          {/* Tab 1: Staff Login (Admin, HR, Receptionist, Employee, Theory, Practical) */}
+          {/* Tab 1: Staff Login */}
           {activeTab === 'staff' && (
             <form onSubmit={handleStaffSubmit} className="space-y-4">
-              {/* Role Pills Selector */}
               <div>
                 <label className="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
                   Select Role Panel
@@ -471,7 +1059,6 @@ const LandingPage = () => {
                 </div>
               </div>
 
-              {/* Email */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Email Address
@@ -489,7 +1076,6 @@ const LandingPage = () => {
                 </div>
               </div>
 
-              {/* Password */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Password
@@ -518,14 +1104,13 @@ const LandingPage = () => {
             </form>
           )}
 
-          {/* Tab 2: Candidate Login (Enrollment Number + Mobile Number) */}
+          {/* Tab 2: Candidate Login */}
           {activeTab === 'candidate' && (
             <form onSubmit={handleCandidateSubmit} className="space-y-4">
               <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
                 ℹ Candidate credentials require Enrollment Number & Registered Mobile Number.
               </div>
 
-              {/* Enrollment Number */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Enrollment Number
@@ -543,7 +1128,6 @@ const LandingPage = () => {
                 </div>
               </div>
 
-              {/* Mobile Number */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Registered Mobile Number
