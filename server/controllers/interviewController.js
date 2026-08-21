@@ -164,9 +164,26 @@ const manualAssignHandler = async (req, res, next) => {
   }
 };
 
+// @desc    Get all completed interview results for Admin/HR
+// @route   GET /api/interviews/admin/history
+// @access  Private (Admin, HR)
+const getAdminInterviewResults = async (req, res, next) => {
+  try {
+    const history = await Interview.find({ status: 'completed' })
+      .populate('candidate', 'name email position department experience requiredRole assignmentStatus')
+      .populate('employee', 'name email employeeRoles')
+      .sort({ completedAt: -1 });
+
+    res.json(history);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   startInterviewHandler,
   completeInterviewHandler,
   getCandidateQueue,
   manualAssignHandler,
+  getAdminInterviewResults,
 };

@@ -15,7 +15,9 @@ import {
 } from 'react-icons/fi';
 
 const Results = () => {
+  const [activeTab, setActiveTab] = useState('assessment'); // 'assessment' | 'interview'
   const [results, setResults] = useState([]);
+  const [interviewResults, setInterviewResults] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Detail & Evaluation Modal
@@ -32,8 +34,12 @@ const Results = () => {
   const fetchResults = async () => {
     setLoading(true);
     try {
-      const res = await API.get('/results');
+      const [res, intRes] = await Promise.all([
+        API.get('/results'),
+        API.get('/interviews/admin/history'),
+      ]);
       setResults(res.data || []);
+      setInterviewResults(intRes.data || []);
     } catch (err) {
       showToast('Failed to load candidate results', 'error');
     } finally {
@@ -109,28 +115,53 @@ const Results = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
         <div>
-          <h1 className="text-xl font-bold text-white tracking-tight">Candidate Assessment Results</h1>
+          <h1 className="text-xl font-bold text-white tracking-tight">Candidate Results & Evaluation Archive</h1>
           <p className="text-xs text-slate-400 mt-1">
-            Review theory scores, inspect practical submissions, grade practical tasks, and track pass/fail criteria.
+            Review exam assessment scores, inspect practical code tasks, and view completed candidate interview results.
           </p>
         </div>
       </div>
 
-      {/* Datatable */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-800">
-              <tr>
-                <th className="px-6 py-3.5">Candidate</th>
-                <th className="px-6 py-3.5">Assessment</th>
-                <th className="px-6 py-3.5">Theory Score</th>
-                <th className="px-6 py-3.5">Practical Score</th>
-                <th className="px-6 py-3.5">Total %</th>
-                <th className="px-6 py-3.5">Status</th>
-                <th className="px-6 py-3.5 text-right">Actions</th>
-              </tr>
-            </thead>
+      {/* Tab Selector */}
+      <div className="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-1.5 rounded-xl w-fit">
+        <button
+          onClick={() => setActiveTab('assessment')}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
+            activeTab === 'assessment'
+              ? 'bg-indigo-600 text-white shadow-md'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          Exam Test Results ({results.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('interview')}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
+            activeTab === 'interview'
+              ? 'bg-indigo-600 text-white shadow-md'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          Employee Interview Results ({interviewResults.length})
+        </button>
+      </div>
+
+      {activeTab === 'assessment' ? (
+        /* Datatable */
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-950 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-800">
+                <tr>
+                  <th className="px-6 py-3.5">Candidate</th>
+                  <th className="px-6 py-3.5">Assessment</th>
+                  <th className="px-6 py-3.5">Theory Score</th>
+                  <th className="px-6 py-3.5">Practical Score</th>
+                  <th className="px-6 py-3.5">Total %</th>
+                  <th className="px-6 py-3.5">Status</th>
+                  <th className="px-6 py-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
             <tbody className="divide-y divide-slate-800/80">
               {loading ? (
                 <tr>
@@ -197,6 +228,88 @@ const Results = () => {
           </table>
         </div>
       </div>
+      ) : (
+        /* Employee Interview Results Table */
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-950 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-800">
+                <tr>
+                  <th className="px-6 py-3.5">Candidate</th>
+                  <th className="px-6 py-3.5">Required Role</th>
+                  <th className="px-6 py-3.5">Evaluated By (Employee)</th>
+                  <th className="px-6 py-3.5">Completed Date</th>
+                  <th className="px-6 py-3.5">Result</th>
+                  <th className="px-6 py-3.5">Feedback / Remarks</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/80">
+                {loading ? (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-12 text-center text-slate-500">
+                      Loading interview evaluation records...
+                    </td>
+                  </tr>
+                ) : interviewResults.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-12 text-center text-slate-500">
+                      No completed candidate interviews recorded yet.
+                    </td>
+                  </tr>
+                ) : (
+                  interviewResults.map((item) => {
+                    const cand = item.candidate || {};
+                    const emp = item.employee || {};
+                    return (
+                      <tr key={item._id} className="hover:bg-slate-800/40 transition">
+                        <td className="px-6 py-4">
+                          <p className="font-bold text-white text-xs">{cand.name || 'Candidate'}</p>
+                          <p className="text-[11px] text-slate-400">{cand.email}</p>
+                          <p className="text-[10px] text-indigo-400">{cand.position}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="px-2.5 py-1 rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-bold uppercase text-[10px]">
+                            {item.requiredRole}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="font-semibold text-white">{emp.name || 'Employee'}</p>
+                          <p className="text-[11px] text-slate-400">{emp.email}</p>
+                        </td>
+                        <td className="px-6 py-4 text-slate-400">
+                          {item.completedAt
+                            ? new Date(item.completedAt).toLocaleString()
+                            : new Date(item.updatedAt).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4">
+                          {item.result === 'pass' && (
+                            <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold uppercase text-[10px]">
+                              Pass
+                            </span>
+                          )}
+                          {item.result === 'fail' && (
+                            <span className="px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 text-rose-400 font-bold uppercase text-[10px]">
+                              Fail
+                            </span>
+                          )}
+                          {item.result === 'on_hold' && (
+                            <span className="px-2 py-0.5 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400 font-bold uppercase text-[10px]">
+                              On Hold
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-slate-300 max-w-xs">
+                          {item.feedback || <span className="italic text-slate-600">No remarks</span>}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Result Inspection & Grade Modal */}
       {selectedResult && (

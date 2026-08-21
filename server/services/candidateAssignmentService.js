@@ -41,26 +41,34 @@ const findBestAvailableEmployee = async (requiredRole) => {
     return null;
   }
 
-  // Calculate active workload (ongoing/assigned interviews) for each matching employee
-  const employeeWorkloads = await Promise.all(
-    matchingEmployees.map(async (emp) => {
-      const activeCount = await Interview.countDocuments({
-        employee: emp._id,
-        status: { $in: ['assigned', 'ongoing'] },
-      });
-      return { employee: emp, activeCount };
-    })
+  // Filter out any employee who already has an assigned or ongoing interview
+  const strictlyAvailableEmployees = [];
+  for (const emp of matchingEmployees) {
+    const activeCount = await Interview.countDocuments({
+      employee: emp._id,
+      status: { $in: ['assigned', 'ongoing'] },
+    });
+    if (activeCount === 0) {
+      strictlyAvailableEmployees.push(emp);
+    } else {
+      // Sync availabilityStatus if it was out of sync
+      if (emp.availabilityStatus !== 'busy') {
+        emp.availabilityStatus = 'busy';
+        await emp.save();
+      }
+    }
+  }
+
+  if (strictlyAvailableEmployees.length === 0) {
+    return null; // All matching employees are currently busy! Candidate remains in waiting queue.
+  }
+
+  // Sort by oldest updatedAt / longest available
+  strictlyAvailableEmployees.sort(
+    (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt)
   );
 
-  // Sort by lowest active count, then by oldest updatedAt
-  employeeWorkloads.sort((a, b) => {
-    if (a.activeCount !== b.activeCount) {
-      return a.activeCount - b.activeCount;
-    }
-    return new Date(a.employee.updatedAt) - new Date(b.employee.updatedAt);
-  });
-
-  return employeeWorkloads[0].employee;
+  return strictlyAvailableEmployees[0];
 };
 
 /**
@@ -76,6 +84,20 @@ const assignNextCandidateForEmployee = async (employeeId) => {
   // Employee must be available
   if (employee.availabilityStatus !== 'available') {
     return null;
+  }
+
+  // Strict check: Is employee already handling an active interview?
+  const activeCount = await Interview.countDocuments({
+    employee: employeeId,
+    status: { $in: ['assigned', 'ongoing'] },
+  });
+
+  if (activeCount > 0) {
+    if (employee.availabilityStatus !== 'busy') {
+      employee.availabilityStatus = 'busy';
+      await employee.save();
+    }
+    return null; // Cannot assign new candidate while employee has an ongoing interview
   }
 
   const normalizedEmployeeRoles = (employee.employeeRoles || []).map(normalizeRole);

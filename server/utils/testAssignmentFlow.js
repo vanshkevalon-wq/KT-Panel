@@ -20,9 +20,9 @@ const runAcceptanceTest = async () => {
     console.log('Connected to MongoDB for acceptance testing.');
 
     // Clean up test data
-    await User.deleteMany({ email: { $in: ['rahul.test@kevalon.in', 'amit.test@kevalon.in'] } });
-    await Candidate.deleteMany({ email: { $in: ['candA.test@example.com', 'candB.test@example.com', 'candC.test@example.com'] } });
-    await Interview.deleteMany({ requiredRole: { $in: ['uiux', 'backend'] } });
+    await User.deleteMany({ role: 'employee' });
+    await Candidate.deleteMany({});
+    await Interview.deleteMany({});
 
     // 1. Admin creates Employee 1 (Rahul: UI/UX, Frontend)
     const employee1 = await User.create({

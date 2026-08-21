@@ -338,12 +338,12 @@ const Candidates = () => {
                     className="w-4 h-4 rounded text-indigo-600 bg-slate-900 border-slate-700 focus:ring-0 cursor-pointer"
                   />
                 </th>
-                <th className="px-6 py-3.5">Candidate</th>
-                <th className="px-6 py-3.5">Position & Dept</th>
-                <th className="px-6 py-3.5">Experience</th>
-                <th className="px-6 py-3.5">Status</th>
-                <th className="px-6 py-3.5">Registered</th>
-                <th className="px-6 py-3.5 text-right">Actions</th>
+                <th className="px-5 py-3.5">Candidate</th>
+                <th className="px-5 py-3.5">Position & Dept</th>
+                <th className="px-5 py-3.5">Required Role</th>
+                <th className="px-5 py-3.5">Assigned Employee</th>
+                <th className="px-5 py-3.5">Interview Result</th>
+                <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/80">
@@ -375,7 +375,7 @@ const Candidates = () => {
                           className="w-4 h-4 rounded text-indigo-600 bg-slate-900 border-slate-700 focus:ring-0 cursor-pointer"
                         />
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-4">
                         <div className="flex items-center space-x-3">
                           <div className="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
                             {c.name ? c.name[0] : 'C'}
@@ -387,18 +387,53 @@ const Candidates = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-4">
                         <p className="font-semibold text-white">{c.position}</p>
                         <p className="text-[11px] text-slate-400">{c.department}</p>
                       </td>
-                      <td className="px-6 py-4 text-slate-300 font-medium">{c.experience || 'N/A'}</td>
-                      <td className="px-6 py-4">
-                        <Badge variant={c.status}>{c.status}</Badge>
+                      <td className="px-5 py-4">
+                        <span className="px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-bold uppercase text-[10px]">
+                          {c.requiredRole || 'UIUX'}
+                        </span>
                       </td>
-                      <td className="px-6 py-4 text-slate-400">
-                        {new Date(c.createdAt).toLocaleDateString()}
+                      <td className="px-5 py-4">
+                        {c.assignedEmployee ? (
+                          <div>
+                            <p className="font-semibold text-white">{c.assignedEmployee.name}</p>
+                            <p className="text-[10px] text-slate-400">{c.assignedEmployee.email}</p>
+                          </div>
+                        ) : (
+                          <span className="text-amber-400 text-xs italic">Unassigned</span>
+                        )}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-5 py-4">
+                        {c.assignmentStatus === 'passed' ? (
+                          <span className="px-2.5 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold uppercase text-[10px]">
+                            Passed
+                          </span>
+                        ) : c.assignmentStatus === 'failed' ? (
+                          <span className="px-2.5 py-1 rounded bg-rose-500/10 border border-rose-500/20 text-rose-400 font-bold uppercase text-[10px]">
+                            Failed
+                          </span>
+                        ) : c.assignmentStatus === 'on_hold' ? (
+                          <span className="px-2.5 py-1 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400 font-bold uppercase text-[10px]">
+                            On Hold
+                          </span>
+                        ) : c.assignmentStatus === 'ongoing' ? (
+                          <span className="px-2.5 py-1 rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-bold uppercase text-[10px]">
+                            Ongoing
+                          </span>
+                        ) : c.assignmentStatus === 'assigned' ? (
+                          <span className="px-2.5 py-1 rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-bold uppercase text-[10px]">
+                            Assigned
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold uppercase text-[10px]">
+                            Waiting
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-5 py-4 text-right">
                         <div className="flex items-center justify-end space-x-2">
                           <button
                             onClick={() => openEditModal(c)}

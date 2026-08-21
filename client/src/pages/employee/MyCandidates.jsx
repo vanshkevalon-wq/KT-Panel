@@ -142,7 +142,7 @@ const MyCandidates = () => {
                     <td className="px-5 py-4 text-right">
                       {cand.assignmentStatus === 'assigned' || cand.assignmentStatus === 'ongoing' ? (
                         <button
-                          onClick={() => navigate('/employee/current-interview')}
+                          onClick={() => navigate(`/employee/current-interview?id=${cand.interviewId || cand._id}`)}
                           className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition"
                         >
                           <FiPlay />

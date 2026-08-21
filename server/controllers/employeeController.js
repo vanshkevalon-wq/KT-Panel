@@ -260,11 +260,19 @@ const getMyCandidates = async (req, res, next) => {
 const getCurrentInterview = async (req, res, next) => {
   try {
     const employeeId = req.user._id;
+    const { id, candidateId } = req.query;
 
-    const interview = await Interview.findOne({
-      employee: employeeId,
-      status: { $in: ['assigned', 'ongoing'] },
-    })
+    let query = { employee: employeeId };
+
+    if (id) {
+      query._id = id;
+    } else if (candidateId) {
+      query.candidate = candidateId;
+    } else {
+      query.status = { $in: ['assigned', 'ongoing'] };
+    }
+
+    const interview = await Interview.findOne(query)
       .populate('candidate')
       .sort({ createdAt: -1 });
 

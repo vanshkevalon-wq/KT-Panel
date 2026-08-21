@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import API from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -21,6 +21,8 @@ import {
 const CurrentInterview = () => {
   const { showToast } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const interviewIdParam = searchParams.get('id');
 
   const [interview, setInterview] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,7 +36,9 @@ const CurrentInterview = () => {
   const fetchCurrentInterview = async () => {
     try {
       setLoading(true);
-      const res = await API.get('/employees/current-interview');
+      const res = await API.get('/employees/current-interview', {
+        params: interviewIdParam ? { id: interviewIdParam } : {},
+      });
       setInterview(res.data);
     } catch (err) {
       showToast('Failed to fetch current interview session.', 'error');
@@ -45,7 +49,7 @@ const CurrentInterview = () => {
 
   useEffect(() => {
     fetchCurrentInterview();
-  }, []);
+  }, [interviewIdParam]);
 
   const handleStartInterview = async () => {
     if (!interview) return;

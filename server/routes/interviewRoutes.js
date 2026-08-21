@@ -5,6 +5,7 @@ const {
   completeInterviewHandler,
   getCandidateQueue,
   manualAssignHandler,
+  getAdminInterviewResults,
 } = require('../controllers/interviewController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
@@ -15,8 +16,9 @@ router.use(protect);
 router.post('/:id/start', authorizeRoles('employee', 'admin'), startInterviewHandler);
 router.post('/:id/complete', authorizeRoles('employee', 'admin'), completeInterviewHandler);
 
-// Admin Queue & Assignment Overrides
+// Admin Queue & Assignment Overrides & Results
 router.get('/admin/queue', authorizeRoles('admin', 'hr'), getCandidateQueue);
+router.get('/admin/history', authorizeRoles('admin', 'hr'), getAdminInterviewResults);
 router.post('/admin/candidates/:id/assign', authorizeRoles('admin'), manualAssignHandler);
 
 module.exports = router;
