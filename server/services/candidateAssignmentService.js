@@ -105,11 +105,12 @@ const assignNextCandidateForEmployee = async (employeeId) => {
     return null;
   }
 
-  // Find oldest waiting candidates
+  // Find oldest waiting verified candidates
   const waitingCandidates = await Candidate.find({
     status: 'active',
     assignmentStatus: 'waiting',
     assignedEmployee: null,
+    applicationStatus: { $in: ['verified', 'waiting'] },
   }).sort({ createdAt: 1 });
 
   // Find first candidate whose requiredRole matches one of employee's roles
@@ -133,11 +134,12 @@ const assignNextCandidateForRole = async (requiredRole) => {
   const normRole = normalizeRole(requiredRole);
   if (!normRole) return null;
 
-  // Find oldest waiting candidate for this role
+  // Find oldest verified waiting candidate for this role
   const waitingCandidates = await Candidate.find({
     status: 'active',
     assignmentStatus: 'waiting',
     assignedEmployee: null,
+    applicationStatus: { $in: ['verified', 'waiting'] },
   }).sort({ createdAt: 1 });
 
   const candidateToAssign = waitingCandidates.find(
@@ -170,9 +172,10 @@ const assignCandidateToEmployee = async (candidateId, employeeId) => {
       $set: {
         assignedEmployee: employeeId,
         assignmentStatus: 'assigned',
+        applicationStatus: 'assigned',
       },
     },
-    { new: true }
+    { returnDocument: 'after' }
   );
 
   if (!candidate) {
@@ -188,7 +191,7 @@ const assignCandidateToEmployee = async (candidateId, employeeId) => {
         availabilityStatus: 'busy',
       },
     },
-    { new: true }
+    { returnDocument: 'after' }
   );
 
   // Check if an existing assigned/ongoing interview record exists or create new
@@ -281,7 +284,7 @@ const completeInterview = async (candidateId, employeeId, result, feedback = '')
       // If on hold, clear assigned employee so it stays in queue without locking employee
       ...(result === 'on_hold' ? { assignedEmployee: null } : {}),
     },
-    { new: true }
+    { returnDocument: 'after' }
   );
 
   // Release employee to Available
@@ -291,7 +294,7 @@ const completeInterview = async (candidateId, employeeId, result, feedback = '')
       availabilityStatus: 'available',
       currentCandidate: null,
     },
-    { new: true }
+    { returnDocument: 'after' }
   );
 
   // Automatically trigger search for NEXT waiting candidate matching employee's skills!

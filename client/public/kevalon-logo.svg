@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" fill="none">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0369a1" />
+    </linearGradient>
+    <linearGradient id="swooshGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+  </defs>
+  <!-- Stylized Wing Swoosh Icon -->
+  <g transform="translate(10, 10)">
+    <path d="M 60,10 C 20,25 5,60 10,95 C 20,80 35,70 50,65 C 30,85 20,95 15,100 C 45,95 75,70 85,40 C 70,55 50,60 35,55 C 55,40 70,25 60,10 Z" fill="url(#logoGradient)" />
+    <path d="M 25,80 C 40,75 55,60 65,45 C 50,60 35,68 25,80 Z" fill="url(#swooshGrad)" opacity="0.8" />
+  </g>
+  <!-- Text KEVALON TECHNOLOGY -->
+  <text x="110" y="55" font-family="'Inter', 'Segoe UI', sans-serif" font-weight="900" font-size="42" fill="#ffffff" letter-spacing="2">KEVALON</text>
+  <text x="112" y="92" font-family="'Inter', 'Segoe UI', sans-serif" font-weight="700" font-size="26" fill="#38bdf8" letter-spacing="4">TECHNOLOGY</text>
+</svg>

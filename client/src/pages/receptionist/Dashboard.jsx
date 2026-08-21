@@ -16,6 +16,7 @@ const ReceptionistDashboard = () => {
   const { showToast, user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
+  const [pendingCandidates, setPendingCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -24,6 +25,7 @@ const ReceptionistDashboard = () => {
       setLoading(true);
       const res = await API.get('/receptionist/dashboard');
       setStats(res.data.stats || {});
+      setPendingCandidates(res.data.pendingCandidates || []);
     } catch (err) {
       showToast('Failed to load receptionist dashboard stats.', 'error');
     } finally {
@@ -110,6 +112,68 @@ const ReceptionistDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Pending Verification Candidates (Registered) */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl space-y-4 p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <FiClock className="text-amber-400 text-lg" />
+            <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+              Candidates Registered (Awaiting Reception Check-In)
+            </h2>
+          </div>
+          <span className="px-3 py-1 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold font-mono">
+            {pendingCandidates.length} Pending
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs text-slate-300">
+            <thead className="bg-slate-950 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <tr>
+                <th className="px-5 py-3">Enrollment #</th>
+                <th className="px-5 py-3">Candidate Name</th>
+                <th className="px-5 py-3">Mobile Number</th>
+                <th className="px-5 py-3">Applying Role</th>
+                <th className="px-5 py-3 text-right">Verification Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/80">
+              {pendingCandidates.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-5 py-8 text-center text-slate-500">
+                    No candidates currently pending check-in. All candidates checked in!
+                  </td>
+                </tr>
+              ) : (
+                pendingCandidates.map((cand) => (
+                  <tr key={cand._id} className="hover:bg-slate-800/40 transition">
+                    <td className="px-5 py-3.5 font-mono font-bold text-emerald-400">
+                      {cand.enrollmentNumber}
+                    </td>
+                    <td className="px-5 py-3.5 font-bold text-white">{cand.name}</td>
+                    <td className="px-5 py-3.5 font-mono text-slate-300">{cand.mobileNumber || cand.phone}</td>
+                    <td className="px-5 py-3.5">
+                      <span className="px-2.5 py-1 rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-bold uppercase text-[10px]">
+                        {cand.requiredRole}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <button
+                        onClick={() => navigate(`/receptionist/verify?query=${cand.enrollmentNumber}`)}
+                        className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs rounded-xl shadow-md transition inline-flex items-center space-x-1"
+                      >
+                        <FiUserCheck className="text-sm" />
+                        <span>Candidate Is Here</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* Quick Action Navigation */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

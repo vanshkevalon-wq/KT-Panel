@@ -33,8 +33,10 @@ const Candidates = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCandidate, setEditingCandidate] = useState(null);
   const [skillsMaster, setSkillsMaster] = useState([]);
+  const [enrollmentNumber, setEnrollmentNumber] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
   const [phone, setPhone] = useState('');
   const [position, setPosition] = useState('');
   const [requiredRole, setRequiredRole] = useState('uiux');
@@ -128,8 +130,10 @@ const Candidates = () => {
   // Create / Edit modal handlers
   const openCreateModal = () => {
     setEditingCandidate(null);
+    setEnrollmentNumber('');
     setName('');
     setEmail('');
+    setMobileNumber('');
     setPhone('');
     setPosition('UI/UX Designer');
     setRequiredRole('uiux');
@@ -141,8 +145,10 @@ const Candidates = () => {
 
   const openEditModal = (c) => {
     setEditingCandidate(c);
+    setEnrollmentNumber(c.enrollmentNumber || '');
     setName(c.name);
     setEmail(c.email);
+    setMobileNumber(c.mobileNumber || c.phone || '');
     setPhone(c.phone || '');
     setPosition(c.position);
     setRequiredRole(c.requiredRole || 'uiux');
@@ -155,14 +161,25 @@ const Candidates = () => {
   const handleSaveCandidate = async (e) => {
     e.preventDefault();
     try {
-      const payload = { name, email, phone, position, requiredRole, department, experience, status };
+      const payload = {
+        enrollmentNumber,
+        name,
+        email,
+        mobileNumber: mobileNumber || phone,
+        phone: phone || mobileNumber,
+        position,
+        requiredRole,
+        department,
+        experience,
+        status,
+      };
 
       if (editingCandidate) {
         await API.put(`/candidates/${editingCandidate._id}`, payload);
         showToast('Candidate profile updated', 'success');
       } else {
-        await API.post('/candidates', payload);
-        showToast('Candidate profile created & auto-assignment triggered!', 'success');
+        const res = await API.post('/candidates', payload);
+        showToast(`Candidate '${res.data.name}' registered! Enrollment Number: ${res.data.enrollmentNumber}`, 'success');
       }
 
       setIsModalOpen(false);
@@ -338,9 +355,10 @@ const Candidates = () => {
                     className="w-4 h-4 rounded text-indigo-600 bg-slate-900 border-slate-700 focus:ring-0 cursor-pointer"
                   />
                 </th>
+                <th className="px-5 py-3.5">Enrollment #</th>
                 <th className="px-5 py-3.5">Candidate</th>
-                <th className="px-5 py-3.5">Position & Dept</th>
-                <th className="px-5 py-3.5">Required Role</th>
+                <th className="px-5 py-3.5">Position & Role</th>
+                <th className="px-5 py-3.5">Reception Status</th>
                 <th className="px-5 py-3.5">Assigned Employee</th>
                 <th className="px-5 py-3.5">Interview Result</th>
                 <th className="px-5 py-3.5 text-right">Actions</th>
@@ -349,13 +367,13 @@ const Candidates = () => {
             <tbody className="divide-y divide-slate-800/80">
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan="8" className="px-6 py-12 text-center text-slate-500">
                     Loading candidate directory...
                   </td>
                 </tr>
               ) : candidates.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan="8" className="px-6 py-12 text-center text-slate-500">
                     No candidates found. Click "+ Add Candidate" or "+ Import From Excel" to add candidates.
                   </td>
                 </tr>
@@ -375,33 +393,47 @@ const Candidates = () => {
                           className="w-4 h-4 rounded text-indigo-600 bg-slate-900 border-slate-700 focus:ring-0 cursor-pointer"
                         />
                       </td>
+                      <td className="px-5 py-4 font-mono font-bold text-emerald-400 text-xs">
+                        {c.enrollmentNumber || 'N/A'}
+                      </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center space-x-3">
                           <div className="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
                             {c.name ? c.name[0] : 'C'}
                           </div>
                           <div>
-                            <div className="flex items-center space-x-2">
-                              <p className="font-bold text-white text-xs">{c.name}</p>
-                              {c.enrollmentNumber && (
-                                <span className="px-1.5 py-0.2 text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded">
-                                  {c.enrollmentNumber}
-                                </span>
-                              )}
-                            </div>
+                            <p className="font-bold text-white text-xs">{c.name}</p>
                             <p className="text-[11px] text-slate-400">{c.email}</p>
-                            {(c.mobileNumber || c.phone) && <p className="text-[10px] text-slate-500">{c.mobileNumber || c.phone}</p>}
+                            <p className="text-[10px] text-slate-500 font-mono">
+                              Mobile: {c.mobileNumber || c.phone || 'N/A'}
+                            </p>
                           </div>
                         </div>
                       </td>
                       <td className="px-5 py-4">
                         <p className="font-semibold text-white">{c.position}</p>
-                        <p className="text-[11px] text-slate-400">{c.department}</p>
-                      </td>
-                      <td className="px-5 py-4">
                         <span className="px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-bold uppercase text-[10px]">
                           {c.requiredRole || 'UIUX'}
                         </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        {c.applicationStatus === 'verified' ? (
+                          <span className="px-2.5 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold uppercase text-[10px]">
+                            Verified at Desk
+                          </span>
+                        ) : c.applicationStatus === 'assigned' || c.applicationStatus === 'ongoing' ? (
+                          <span className="px-2.5 py-1 rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-bold uppercase text-[10px]">
+                            In Interview
+                          </span>
+                        ) : c.applicationStatus === 'completed' ? (
+                          <span className="px-2.5 py-1 rounded bg-purple-500/10 border border-purple-500/20 text-purple-400 font-bold uppercase text-[10px]">
+                            Completed
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded bg-slate-800 border border-slate-700 text-slate-400 font-bold uppercase text-[10px]">
+                            Registered (Pending Check-In)
+                          </span>
+                        )}
                       </td>
                       <td className="px-5 py-4">
                         {c.assignedEmployee ? (
@@ -474,18 +506,32 @@ const Candidates = () => {
         title={editingCandidate ? `Edit Candidate: ${editingCandidate.name}` : 'Add New Candidate'}
       >
         <form onSubmit={handleSaveCandidate} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
-              Candidate Full Name
-            </label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. John Patel"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                Enrollment Number <span className="text-[10px] text-emerald-400 font-normal">(Auto-generated if left blank)</span>
+              </label>
+              <input
+                type="text"
+                value={enrollmentNumber}
+                onChange={(e) => setEnrollmentNumber(e.target.value.toUpperCase())}
+                placeholder="e.g. KT202600001 (Auto)"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-emerald-400 font-mono font-bold focus:outline-none focus:border-indigo-500 uppercase"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                Candidate Full Name
+              </label>
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. John Patel"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -504,14 +550,18 @@ const Candidates = () => {
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
-                Phone Number
+                Mobile Number <span className="text-[10px] text-amber-400 font-normal">(Used for Login & Reception Check-in)</span>
               </label>
               <input
                 type="text"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+91 98765 43210"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                required
+                value={mobileNumber}
+                onChange={(e) => {
+                  setMobileNumber(e.target.value);
+                  setPhone(e.target.value);
+                }}
+                placeholder="e.g. 9876543210"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-bold"
               />
             </div>
           </div>

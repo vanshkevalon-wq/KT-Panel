@@ -44,6 +44,13 @@ const getReceptionistDashboard = async (req, res, next) => {
       updatedAt: { $gte: startOfDay, $lte: endOfDay },
     });
 
+    const pendingCandidates = await Candidate.find({
+      applicationStatus: 'registered',
+      status: 'active',
+    })
+      .sort({ createdAt: -1 })
+      .limit(50);
+
     res.json({
       stats: {
         todaysTotal,
@@ -53,6 +60,7 @@ const getReceptionistDashboard = async (req, res, next) => {
         interviewsOngoing,
         completedToday,
       },
+      pendingCandidates,
     });
   } catch (error) {
     next(error);

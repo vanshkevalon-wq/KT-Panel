@@ -60,6 +60,9 @@ import ReceptionistProfile from './pages/receptionist/Profile';
 // Candidate Test Runner
 import TakeAssessment from './pages/candidate/TakeAssessment';
 
+// Public Landing Page
+import LandingPage from './pages/public/LandingPage';
+
 const RootRedirect = () => {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
@@ -67,16 +70,16 @@ const RootRedirect = () => {
 };
 
 function AppRoutes() {
+  const { user } = useAuth();
+
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/candidate/login" element={<CandidateLogin />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LandingPage />} />
+      <Route path="/candidate/login" element={<LandingPage />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/assessment/take/:assignmentId" element={<TakeAssessment />} />
-
-      {/* Root redirect */}
-      <Route path="/" element={<RootRedirect />} />
 
       {/* Admin Panel Routes */}
       <Route
@@ -217,7 +220,7 @@ function AppRoutes() {
       </Route>
 
       {/* Fallback */}
-      <Route path="*" element={<RootRedirect />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
