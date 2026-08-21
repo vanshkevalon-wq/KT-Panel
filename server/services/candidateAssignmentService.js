@@ -274,12 +274,17 @@ const completeInterview = async (candidateId, employeeId, result, feedback = '')
   interview.result = result;
   interview.completedAt = new Date();
   interview.feedback = feedback;
+  interview.feedbackVisibleToCandidate = true;
   await interview.save();
 
   // Update candidate record
   const candidate = await Candidate.findByIdAndUpdate(
     candidateId,
     {
+      result: result,
+      resultPublished: true,
+      applicationStatus: 'completed',
+      interviewStatus: 'completed',
       assignmentStatus: finalCandidateStatus,
       // If on hold, clear assigned employee so it stays in queue without locking employee
       ...(result === 'on_hold' ? { assignedEmployee: null } : {}),

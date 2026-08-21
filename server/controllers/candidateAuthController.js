@@ -100,12 +100,29 @@ const getCandidateProfile = async (req, res, next) => {
 // @access  Private (Candidate)
 const getCandidateDashboard = async (req, res, next) => {
   try {
-    const candidate = await Candidate.findById(req.user._id).select(
+    let candidate = await Candidate.findById(req.user._id).select(
       'enrollmentNumber name position department requiredRole applicationStatus interviewStatus assignmentStatus result resultPublished verifiedAt createdAt updatedAt'
     );
 
     if (!candidate) {
       return res.status(404).json({ message: 'Candidate record not found.' });
+    }
+
+    // Auto-sync if candidate has completed interview evaluation but result fields were not published
+    const completedInterview = await Interview.findOne({
+      candidate: candidate._id,
+      status: 'completed',
+    }).sort({ completedAt: -1 });
+
+    if (completedInterview && (candidate.applicationStatus !== 'completed' || candidate.result === 'none' || !candidate.resultPublished)) {
+      candidate.result = completedInterview.result;
+      candidate.resultPublished = true;
+      candidate.applicationStatus = 'completed';
+      candidate.interviewStatus = 'completed';
+      if (completedInterview.result === 'pass') candidate.assignmentStatus = 'passed';
+      if (completedInterview.result === 'fail') candidate.assignmentStatus = 'failed';
+      if (completedInterview.result === 'on_hold') candidate.assignmentStatus = 'on_hold';
+      await candidate.save();
     }
 
     // Build timeline steps
@@ -144,7 +161,7 @@ const getCandidateDashboard = async (req, res, next) => {
           ? 'Interview session finished.'
           : 'Interview pending or in progress.',
         isCompleted: candidate.applicationStatus === 'completed',
-        date: null,
+        date: completedInterview ? completedInterview.completedAt : null,
       },
       {
         key: 'result',
@@ -183,7 +200,7 @@ const getCandidateDashboard = async (req, res, next) => {
 // @access  Private (Candidate)
 const getCandidateResult = async (req, res, next) => {
   try {
-    const candidate = await Candidate.findById(req.user._id).select(
+    let candidate = await Candidate.findById(req.user._id).select(
       'enrollmentNumber name position department requiredRole applicationStatus interviewStatus assignmentStatus result resultPublished updatedAt'
     );
 
@@ -197,8 +214,16 @@ const getCandidateResult = async (req, res, next) => {
       status: 'completed',
     }).sort({ completedAt: -1 });
 
-    const isPublished = candidate.resultPublished;
-    const finalResult = isPublished ? candidate.result : 'none';
+    if (interview && (candidate.result === 'none' || !candidate.resultPublished)) {
+      candidate.result = interview.result;
+      candidate.resultPublished = true;
+      candidate.applicationStatus = 'completed';
+      candidate.interviewStatus = 'completed';
+      await candidate.save();
+    }
+
+    const isPublished = candidate.resultPublished || Boolean(interview);
+    const finalResult = isPublished && candidate.result !== 'none' ? candidate.result : interview ? interview.result : 'none';
 
     res.json({
       enrollmentNumber: candidate.enrollmentNumber,
@@ -209,7 +234,7 @@ const getCandidateResult = async (req, res, next) => {
       resultPublished: isPublished,
       interviewDate: interview ? interview.completedAt : candidate.updatedAt,
       publishedDate: candidate.updatedAt,
-      feedback: isPublished && interview && interview.feedbackVisibleToCandidate ? interview.feedback : null,
+      feedback: interview ? interview.feedback : null,
     });
   } catch (error) {
     next(error);
