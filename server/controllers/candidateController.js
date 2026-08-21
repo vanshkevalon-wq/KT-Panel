@@ -179,7 +179,24 @@ const getCandidates = async (req, res, next) => {
     const candidates = await Candidate.find(query)
       .populate('assignedEmployee', 'name email employeeRoles availabilityStatus')
       .sort({ createdAt: -1 });
-    res.json(candidates);
+
+    const Interview = require('../models/Interview');
+    const enrichedCandidates = await Promise.all(
+      candidates.map(async (cand) => {
+        const candObj = cand.toObject();
+        if (!candObj.assignedEmployee) {
+          const interview = await Interview.findOne({ candidate: cand._id })
+            .populate('employee', 'name email employeeRoles availabilityStatus')
+            .sort({ createdAt: -1 });
+          if (interview && interview.employee) {
+            candObj.assignedEmployee = interview.employee;
+          }
+        }
+        return candObj;
+      })
+    );
+
+    res.json(enrichedCandidates);
   } catch (error) {
     next(error);
   }

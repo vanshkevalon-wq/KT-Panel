@@ -123,6 +123,22 @@ const getCandidateQueue = async (req, res, next) => {
       .populate('assignedEmployee', 'name email employeeRoles availabilityStatus')
       .sort({ createdAt: -1 });
 
+    // Fallback: If assignedEmployee is null on candidate document, populate from Interview model
+    const enrichedCandidates = await Promise.all(
+      candidates.map(async (cand) => {
+        const candObj = cand.toObject();
+        if (!candObj.assignedEmployee) {
+          const interview = await Interview.findOne({ candidate: cand._id })
+            .populate('employee', 'name email employeeRoles availabilityStatus')
+            .sort({ createdAt: -1 });
+          if (interview && interview.employee) {
+            candObj.assignedEmployee = interview.employee;
+          }
+        }
+        return candObj;
+      })
+    );
+
     const stats = {
       waiting: await Candidate.countDocuments({
         assignmentStatus: 'waiting',
@@ -137,7 +153,7 @@ const getCandidateQueue = async (req, res, next) => {
       onHold: await Candidate.countDocuments({ assignmentStatus: 'on_hold' }),
     };
 
-    res.json({ candidates, stats });
+    res.json({ candidates: enrichedCandidates, stats });
   } catch (error) {
     next(error);
   }

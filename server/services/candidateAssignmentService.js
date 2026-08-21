@@ -12,13 +12,15 @@ const normalizeRole = (role) => {
   return String(role).trim().toLowerCase().replace(/[^a-z0-9]/g, '');
 };
 
+const isRoleMatch = (role1, role2) => {
+  const r1 = normalizeRole(role1);
+  const r2 = normalizeRole(role2);
+  if (!r1 || !r2) return false;
+  return r1 === r2 || r1.includes(r2) || r2.includes(r1);
+};
+
 /**
  * Finds best matching available employee for a candidate's required role.
- * Queue / Load balancing logic:
- * 1. Filter active employees having the required role in employeeRoles.
- * 2. Filter out offline / busy employees.
- * 3. Workload check: lowest active assignments count.
- * 4. Pick longest available / longest created.
  */
 const findBestAvailableEmployee = async (requiredRole) => {
   const normRole = normalizeRole(requiredRole);
@@ -31,10 +33,9 @@ const findBestAvailableEmployee = async (requiredRole) => {
     availabilityStatus: 'available',
   });
 
-  // Filter employees who possess the required role (case-insensitive slug match)
+  // Filter employees who possess matching role/skill
   const matchingEmployees = activeEmployees.filter((emp) => {
-    const userRoles = (emp.employeeRoles || []).map(normalizeRole);
-    return userRoles.includes(normRole);
+    return (emp.employeeRoles || []).some((role) => isRoleMatch(role, requiredRole));
   });
 
   if (matchingEmployees.length === 0) {
@@ -51,7 +52,6 @@ const findBestAvailableEmployee = async (requiredRole) => {
     if (activeCount === 0) {
       strictlyAvailableEmployees.push(emp);
     } else {
-      // Sync availabilityStatus if it was out of sync
       if (emp.availabilityStatus !== 'busy') {
         emp.availabilityStatus = 'busy';
         await emp.save();
@@ -60,10 +60,9 @@ const findBestAvailableEmployee = async (requiredRole) => {
   }
 
   if (strictlyAvailableEmployees.length === 0) {
-    return null; // All matching employees are currently busy! Candidate remains in waiting queue.
+    return null;
   }
 
-  // Sort by oldest updatedAt / longest available
   strictlyAvailableEmployees.sort(
     (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt)
   );
@@ -73,7 +72,6 @@ const findBestAvailableEmployee = async (requiredRole) => {
 
 /**
  * Assigns next waiting candidate matching an employee's skills.
- * Triggered when an employee becomes AVAILABLE.
  */
 const assignNextCandidateForEmployee = async (employeeId) => {
   const employee = await User.findById(employeeId);
@@ -81,12 +79,10 @@ const assignNextCandidateForEmployee = async (employeeId) => {
     return null;
   }
 
-  // Employee must be available
   if (employee.availabilityStatus !== 'available') {
     return null;
   }
 
-  // Strict check: Is employee already handling an active interview?
   const activeCount = await Interview.countDocuments({
     employee: employeeId,
     status: { $in: ['assigned', 'ongoing'] },
@@ -97,11 +93,11 @@ const assignNextCandidateForEmployee = async (employeeId) => {
       employee.availabilityStatus = 'busy';
       await employee.save();
     }
-    return null; // Cannot assign new candidate while employee has an ongoing interview
+    return null;
   }
 
-  const normalizedEmployeeRoles = (employee.employeeRoles || []).map(normalizeRole);
-  if (normalizedEmployeeRoles.length === 0) {
+  const empRoles = employee.employeeRoles || [];
+  if (empRoles.length === 0) {
     return null;
   }
 
@@ -113,28 +109,25 @@ const assignNextCandidateForEmployee = async (employeeId) => {
     applicationStatus: { $in: ['verified', 'waiting'] },
   }).sort({ createdAt: 1 });
 
-  // Find first candidate whose requiredRole matches one of employee's roles
+  // Find first candidate whose requiredRole matches employee's skills
   const candidateToAssign = waitingCandidates.find((cand) => {
-    return normalizedEmployeeRoles.includes(normalizeRole(cand.requiredRole));
+    return empRoles.some((eRole) => isRoleMatch(eRole, cand.requiredRole));
   });
 
   if (!candidateToAssign) {
-    return null; // No waiting candidates matching employee's skills
+    return null;
   }
 
-  // Perform atomic assignment
   return await assignCandidateToEmployee(candidateToAssign._id, employee._id);
 };
 
 /**
  * Assigns next available candidate matching requiredRole to an available employee.
- * Triggered when a new CANDIDATE is created or added to queue.
  */
 const assignNextCandidateForRole = async (requiredRole) => {
   const normRole = normalizeRole(requiredRole);
   if (!normRole) return null;
 
-  // Find oldest verified waiting candidate for this role
   const waitingCandidates = await Candidate.find({
     status: 'active',
     assignmentStatus: 'waiting',
@@ -142,8 +135,8 @@ const assignNextCandidateForRole = async (requiredRole) => {
     applicationStatus: { $in: ['verified', 'waiting'] },
   }).sort({ createdAt: 1 });
 
-  const candidateToAssign = waitingCandidates.find(
-    (cand) => normalizeRole(cand.requiredRole) === normRole
+  const candidateToAssign = waitingCandidates.find((cand) =>
+    isRoleMatch(cand.requiredRole, requiredRole)
   );
 
   if (!candidateToAssign) {
@@ -152,7 +145,7 @@ const assignNextCandidateForRole = async (requiredRole) => {
 
   const bestEmployee = await findBestAvailableEmployee(candidateToAssign.requiredRole);
   if (!bestEmployee) {
-    return null; // All employees busy or no employee has this role
+    return null;
   }
 
   return await assignCandidateToEmployee(candidateToAssign._id, bestEmployee._id);
