@@ -92,6 +92,12 @@ const updateUser = async (req, res, next) => {
     if (name) user.name = name;
     if (email) user.email = email;
     if (role) user.role = role;
+
+    // Prevent deactivating admin accounts
+    if (user.role === 'admin' && typeof isActive === 'boolean' && !isActive) {
+      return res.status(400).json({ message: 'Admin accounts cannot be deactivated.' });
+    }
+
     if (typeof isActive === 'boolean') user.isActive = isActive;
     if (Array.isArray(customPermissions)) user.customPermissions = customPermissions;
 
@@ -156,6 +162,10 @@ const deleteUser = async (req, res, next) => {
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.role === 'admin') {
+      return res.status(400).json({ message: 'Admin accounts cannot be deactivated or deleted.' });
     }
 
     if (user._id.toString() === req.user._id.toString()) {

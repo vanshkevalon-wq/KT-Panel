@@ -110,6 +110,10 @@ const Users = () => {
   };
 
   const handleToggleActive = async (u) => {
+    if (u.role === 'admin') {
+      showToast('Admin accounts cannot be deactivated', 'error');
+      return;
+    }
     try {
       await API.put(`/users/${u._id}`, { isActive: !u.isActive });
       showToast(`User ${!u.isActive ? 'activated' : 'deactivated'}`, 'success');
@@ -267,12 +271,21 @@ const Users = () => {
                           <FiKey className="text-sm" />
                         </button>
                         <button
-                          onClick={() => handleToggleActive(u)}
-                          title={u.isActive ? 'Deactivate User' : 'Activate User'}
-                          className={`p-2 rounded-lg bg-slate-800 transition ${
-                            u.isActive
-                              ? 'text-rose-400 hover:bg-rose-500/10'
-                              : 'text-emerald-400 hover:bg-emerald-500/10'
+                          onClick={() => u.role !== 'admin' && handleToggleActive(u)}
+                          disabled={u.role === 'admin'}
+                          title={
+                            u.role === 'admin'
+                              ? 'Admin accounts cannot be deactivated'
+                              : u.isActive
+                              ? 'Deactivate User'
+                              : 'Activate User'
+                          }
+                          className={`p-2 rounded-lg transition ${
+                            u.role === 'admin'
+                              ? 'bg-slate-800/40 text-slate-600 border border-slate-800/60 cursor-not-allowed opacity-40'
+                              : u.isActive
+                              ? 'bg-slate-800 text-rose-400 hover:bg-rose-500/10'
+                              : 'bg-slate-800 text-emerald-400 hover:bg-emerald-500/10'
                           }`}
                         >
                           {u.isActive ? <FiUserX className="text-sm" /> : <FiUserCheck className="text-sm" />}
@@ -358,12 +371,18 @@ const Users = () => {
             <input
               type="checkbox"
               id="isActive"
+              disabled={editingUser?.role === 'admin'}
               checked={isActive}
               onChange={(e) => setIsActive(e.target.checked)}
-              className="w-4 h-4 rounded bg-slate-950 border-slate-800 text-indigo-600 focus:ring-0"
+              className="w-4 h-4 rounded bg-slate-950 border-slate-800 text-indigo-600 focus:ring-0 disabled:opacity-40 disabled:cursor-not-allowed"
             />
-            <label htmlFor="isActive" className="text-xs text-slate-300 font-semibold cursor-pointer">
-              Account Active
+            <label
+              htmlFor="isActive"
+              className={`text-xs font-semibold ${
+                editingUser?.role === 'admin' ? 'text-slate-500 cursor-not-allowed' : 'text-slate-300 cursor-pointer'
+              }`}
+            >
+              Account Active {editingUser?.role === 'admin' && '(Admin accounts cannot be deactivated)'}
             </label>
           </div>
 
