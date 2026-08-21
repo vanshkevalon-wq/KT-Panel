@@ -4,6 +4,8 @@ import { AuthProvider, useAuth, ROLE_REDIRECTS } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
+import ScrollToTop from './components/common/ScrollToTop';
+import ScrollToTopButton from './components/common/ScrollToTopButton';
 
 // Auth Pages
 import Login from './pages/auth/Login';
@@ -234,7 +236,9 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
+          <ScrollToTop />
           <AppRoutes />
+          <ScrollToTopButton />
         </Router>
       </AuthProvider>
     </ThemeProvider>
