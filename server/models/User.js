@@ -23,9 +23,28 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['admin', 'hr', 'theory', 'practical'],
+      enum: ['admin', 'hr', 'theory', 'practical', 'employee'],
       required: true,
       default: 'theory',
+    },
+    employeeRoles: {
+      type: [String],
+      default: [],
+    },
+    availabilityStatus: {
+      type: String,
+      enum: ['available', 'busy', 'offline'],
+      default: 'available',
+    },
+    currentCandidate: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Candidate',
+      default: null,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
     },
     isActive: {
       type: Boolean,
@@ -43,6 +62,9 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+userSchema.index({ role: 1, isActive: 1, availabilityStatus: 1 });
+userSchema.index({ employeeRoles: 1 });
 
 // Hash password before saving
 userSchema.pre('save', async function () {

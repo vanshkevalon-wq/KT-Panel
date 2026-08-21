@@ -32,10 +32,12 @@ const Candidates = () => {
   // Create / Edit Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCandidate, setEditingCandidate] = useState(null);
+  const [skillsMaster, setSkillsMaster] = useState([]);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [position, setPosition] = useState('');
+  const [requiredRole, setRequiredRole] = useState('uiux');
   const [department, setDepartment] = useState('');
   const [experience, setExperience] = useState('');
   const [status, setStatus] = useState('active');
@@ -48,6 +50,15 @@ const Candidates = () => {
 
   const { showToast } = useAuth();
 
+  const fetchSkills = async () => {
+    try {
+      const res = await API.get('/skills?status=active');
+      setSkillsMaster(res.data);
+    } catch (e) {
+      // ignore
+    }
+  };
+
   const fetchCandidates = async () => {
     setLoading(true);
     try {
@@ -55,7 +66,6 @@ const Candidates = () => {
         params: { search, department: deptFilter, status: statusFilter },
       });
       setCandidates(res.data || []);
-      // reset selected IDs when list refreshes
       setSelectedIds([]);
     } catch (err) {
       showToast('Failed to load candidate list', 'error');
@@ -65,6 +75,7 @@ const Candidates = () => {
   };
 
   useEffect(() => {
+    fetchSkills();
     fetchCandidates();
   }, [search, deptFilter, statusFilter]);
 
@@ -120,7 +131,8 @@ const Candidates = () => {
     setName('');
     setEmail('');
     setPhone('');
-    setPosition('');
+    setPosition('UI/UX Designer');
+    setRequiredRole('uiux');
     setDepartment('Engineering');
     setExperience('2 Years');
     setStatus('active');
@@ -133,6 +145,7 @@ const Candidates = () => {
     setEmail(c.email);
     setPhone(c.phone || '');
     setPosition(c.position);
+    setRequiredRole(c.requiredRole || 'uiux');
     setDepartment(c.department);
     setExperience(c.experience || '');
     setStatus(c.status || 'active');
@@ -142,14 +155,14 @@ const Candidates = () => {
   const handleSaveCandidate = async (e) => {
     e.preventDefault();
     try {
-      const payload = { name, email, phone, position, department, experience, status };
+      const payload = { name, email, phone, position, requiredRole, department, experience, status };
 
       if (editingCandidate) {
         await API.put(`/candidates/${editingCandidate._id}`, payload);
         showToast('Candidate profile updated', 'success');
       } else {
         await API.post('/candidates', payload);
-        showToast('Candidate profile created', 'success');
+        showToast('Candidate profile created & auto-assignment triggered!', 'success');
       }
 
       setIsModalOpen(false);
@@ -461,7 +474,7 @@ const Candidates = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
                 Applying Position
@@ -474,6 +487,22 @@ const Candidates = () => {
                 placeholder="Frontend Developer"
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
               />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                Required Role / Skill
+              </label>
+              <select
+                value={requiredRole}
+                onChange={(e) => setRequiredRole(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-semibold"
+              >
+                {skillsMaster.map((s) => (
+                  <option key={s._id} value={s.slug}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">

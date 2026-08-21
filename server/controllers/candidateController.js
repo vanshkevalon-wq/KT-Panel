@@ -1,5 +1,6 @@
 const Candidate = require('../models/Candidate');
 const { logActivity } = require('../services/auditLogService');
+const { assignNextCandidateForRole } = require('../services/candidateAssignmentService');
 const xlsx = require('xlsx');
 const fs = require('fs');
 
@@ -67,6 +68,15 @@ const SYNONYMS = {
     'profile',
     'jobposition',
   ],
+  requiredRole: [
+    'requiredrole',
+    'requiredskill',
+    'skill',
+    'skills',
+    'appliedfor',
+    'roleapplied',
+    'targetrole',
+  ],
   department: [
     'department',
     'dept',
@@ -122,7 +132,8 @@ const detectColumnMapping = (headers) => {
       if (norm.includes('name')) matchedField = 'name';
       else if (norm.includes('mail')) matchedField = 'email';
       else if (norm.includes('phone') || norm.includes('mobile') || norm.includes('contact')) matchedField = 'phone';
-      else if (norm.includes('role') || norm.includes('title') || norm.includes('designation') || norm.includes('position') || norm.includes('post')) matchedField = 'position';
+      else if (norm.includes('role') || norm.includes('skill') || norm.includes('applied')) matchedField = 'requiredRole';
+      else if (norm.includes('title') || norm.includes('designation') || norm.includes('position') || norm.includes('post')) matchedField = 'position';
       else if (norm.includes('dept') || norm.includes('division') || norm.includes('branch')) matchedField = 'department';
       else if (norm.includes('exp') || norm.includes('year')) matchedField = 'experience';
       else if (norm.includes('status') || norm.includes('state')) matchedField = 'status';
@@ -141,7 +152,7 @@ const detectColumnMapping = (headers) => {
 // @access  Private (Admin, HR)
 const getCandidates = async (req, res, next) => {
   try {
-    const { search, department, status } = req.query;
+    const { search, department, status, role } = req.query;
     const query = {};
 
     if (department && department !== 'all') {
@@ -152,15 +163,22 @@ const getCandidates = async (req, res, next) => {
       query.status = status;
     }
 
+    if (role && role !== 'all') {
+      query.requiredRole = { $regex: role, $options: 'i' };
+    }
+
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
         { email: { $regex: search, $options: 'i' } },
         { position: { $regex: search, $options: 'i' } },
+        { requiredRole: { $regex: search, $options: 'i' } },
       ];
     }
 
-    const candidates = await Candidate.find(query).sort({ createdAt: -1 });
+    const candidates = await Candidate.find(query)
+      .populate('assignedEmployee', 'name email employeeRoles availabilityStatus')
+      .sort({ createdAt: -1 });
     res.json(candidates);
   } catch (error) {
     next(error);
@@ -172,7 +190,7 @@ const getCandidates = async (req, res, next) => {
 // @access  Private (Admin, HR)
 const createCandidate = async (req, res, next) => {
   try {
-    const { name, email, phone, position, department, experience, status } = req.body;
+    const { name, email, phone, position, department, experience, status, requiredRole } = req.body;
 
     if (!name || !email) {
       return res.status(400).json({ message: 'Candidate name and email are required.' });
@@ -183,14 +201,18 @@ const createCandidate = async (req, res, next) => {
       return res.status(400).json({ message: `Candidate with email '${email}' already exists.` });
     }
 
+    const effectiveRole = (requiredRole || position || 'uiux').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+
     const candidate = await Candidate.create({
       name,
       email,
       phone,
       position: position || 'Developer',
+      requiredRole: effectiveRole,
       department: department || 'Engineering',
       experience: experience || '1 Year',
       status: status || 'active',
+      assignmentStatus: 'waiting',
       createdBy: req.user._id,
     });
 
@@ -198,11 +220,24 @@ const createCandidate = async (req, res, next) => {
       user: req.user,
       action: 'CREATE_CANDIDATE',
       module: 'CANDIDATE_MANAGEMENT',
-      description: `${req.user.role.toUpperCase()} user created candidate ${candidate.name} (${candidate.position}).`,
+      description: `${req.user.role.toUpperCase()} user created candidate ${candidate.name} (${candidate.position}, Role: ${candidate.requiredRole}).`,
       req,
     });
 
-    res.status(201).json(candidate);
+    // Trigger automatic employee assignment
+    let assignmentResult = null;
+    try {
+      assignmentResult = await assignNextCandidateForRole(candidate.requiredRole);
+    } catch (assignError) {
+      console.error('Auto assignment error on candidate creation:', assignError.message);
+    }
+
+    const responseData = await Candidate.findById(candidate._id).populate(
+      'assignedEmployee',
+      'name email availabilityStatus'
+    );
+
+    res.status(201).json(responseData);
   } catch (error) {
     next(error);
   }
@@ -213,7 +248,7 @@ const createCandidate = async (req, res, next) => {
 // @access  Private (Admin, HR)
 const updateCandidate = async (req, res, next) => {
   try {
-    const { name, email, phone, position, department, experience, status } = req.body;
+    const { name, email, phone, position, department, experience, status, requiredRole, assignmentStatus } = req.body;
     const candidate = await Candidate.findById(req.params.id);
 
     if (!candidate) {
@@ -224,11 +259,24 @@ const updateCandidate = async (req, res, next) => {
     if (email) candidate.email = email;
     if (phone !== undefined) candidate.phone = phone;
     if (position) candidate.position = position;
+    if (requiredRole) {
+      candidate.requiredRole = requiredRole.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
     if (department) candidate.department = department;
     if (experience !== undefined) candidate.experience = experience;
     if (status) candidate.status = status;
+    if (assignmentStatus) candidate.assignmentStatus = assignmentStatus;
 
     await candidate.save();
+
+    // If candidate became waiting or role updated, attempt assignment
+    if (candidate.assignmentStatus === 'waiting' && !candidate.assignedEmployee) {
+      try {
+        await assignNextCandidateForRole(candidate.requiredRole);
+      } catch (e) {
+        // ignore
+      }
+    }
 
     await logActivity({
       user: req.user,
@@ -238,7 +286,12 @@ const updateCandidate = async (req, res, next) => {
       req,
     });
 
-    res.json(candidate);
+    const updated = await Candidate.findById(candidate._id).populate(
+      'assignedEmployee',
+      'name email availabilityStatus'
+    );
+
+    res.json(updated);
   } catch (error) {
     next(error);
   }
@@ -336,6 +389,7 @@ const importCandidatesFromExcel = async (req, res, next) => {
       let email = colMapping.email ? String(row[colMapping.email] || '').trim().toLowerCase() : '';
       let phone = colMapping.phone ? String(row[colMapping.phone] || '').trim() : '';
       let position = colMapping.position ? String(row[colMapping.position] || '').trim() : '';
+      let requiredRole = colMapping.requiredRole ? String(row[colMapping.requiredRole] || '').trim() : '';
       let department = colMapping.department ? String(row[colMapping.department] || '').trim() : '';
       let experience = colMapping.experience ? String(row[colMapping.experience] || '').trim() : '';
       let statusRaw = colMapping.status ? String(row[colMapping.status] || '').trim().toLowerCase() : '';
@@ -387,16 +441,27 @@ const importCandidatesFromExcel = async (req, res, next) => {
         continue;
       }
 
+      const effectiveRole = (requiredRole || position || 'uiux').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+
       const newCand = await Candidate.create({
         name,
         email,
         phone: phone || '',
         position: position || 'Developer',
+        requiredRole: effectiveRole,
         department: department || 'Engineering',
         experience: experience || '1 Year',
         status,
+        assignmentStatus: 'waiting',
         createdBy: req.user._id,
       });
+
+      // Attempt automatic assignment
+      try {
+        await assignNextCandidateForRole(effectiveRole);
+      } catch (assignError) {
+        // ignore
+      }
 
       importedCandidates.push(newCand);
     }

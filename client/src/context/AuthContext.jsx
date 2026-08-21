@@ -8,6 +8,7 @@ export const ROLE_REDIRECTS = {
   hr: '/hr/dashboard',
   theory: '/theory/dashboard',
   practical: '/practical/dashboard',
+  employee: '/employee/dashboard',
 };
 
 export const AuthProvider = ({ children }) => {

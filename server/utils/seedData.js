@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Skill = require('../models/Skill');
 const TheoryQuestion = require('../models/TheoryQuestion');
 const PracticalQuestion = require('../models/PracticalQuestion');
 const Candidate = require('../models/Candidate');
@@ -6,6 +7,27 @@ const Assessment = require('../models/Assessment');
 
 const seedDefaultData = async () => {
   try {
+    // Seed default skills if none exist
+    const skillCount = await Skill.countDocuments();
+    if (skillCount === 0) {
+      const defaultSkills = [
+        { name: 'UI/UX', slug: 'uiux', description: 'UI/UX Design & Prototyping' },
+        { name: 'Frontend', slug: 'frontend', description: 'Frontend Web Development' },
+        { name: 'Backend', slug: 'backend', description: 'Backend Server Development' },
+        { name: 'Full Stack', slug: 'fullstack', description: 'Full Stack Development' },
+        { name: 'React', slug: 'react', description: 'React.js Ecosystem' },
+        { name: 'Node.js', slug: 'nodejs', description: 'Node.js & Express' },
+        { name: 'PHP', slug: 'php', description: 'PHP Core' },
+        { name: 'Laravel', slug: 'laravel', description: 'Laravel Framework' },
+        { name: 'Graphic Design', slug: 'graphicdesign', description: 'Visual & Graphic Design' },
+        { name: 'QA', slug: 'qa', description: 'Quality Assurance' },
+        { name: 'Testing', slug: 'testing', description: 'Automated & Manual Testing' },
+        { name: 'Flutter', slug: 'flutter', description: 'Flutter Mobile App Dev' },
+      ];
+      await Skill.insertMany(defaultSkills);
+      console.log('Seeded default Skill Master records.');
+    }
+
     // Seed default users if none exist
     const adminExists = await User.findOne({ email: 'admin@kevalontechnology.in' });
     if (!adminExists) {

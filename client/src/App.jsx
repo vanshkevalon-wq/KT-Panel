@@ -12,6 +12,9 @@ import Unauthorized from './pages/Unauthorized';
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard';
 import Users from './pages/admin/Users';
+import Employees from './pages/admin/Employees';
+import Skills from './pages/admin/Skills';
+import CandidateQueue from './pages/admin/CandidateQueue';
 import QuestionBank from './pages/admin/QuestionBank';
 import PDFImport from './pages/admin/PDFImport';
 import Assessments from './pages/admin/Assessments';
@@ -30,6 +33,13 @@ import TheoryDashboard from './pages/theory/Dashboard';
 
 // Practical Pages
 import PracticalDashboard from './pages/practical/Dashboard';
+
+// Employee Pages
+import EmployeeDashboard from './pages/employee/Dashboard';
+import MyCandidates from './pages/employee/MyCandidates';
+import CurrentInterview from './pages/employee/CurrentInterview';
+import InterviewHistory from './pages/employee/InterviewHistory';
+import EmployeeProfile from './pages/employee/Profile';
 
 // Candidate Test Runner
 import TakeAssessment from './pages/candidate/TakeAssessment';
@@ -63,6 +73,9 @@ function AppRoutes() {
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="users" element={<Users />} />
+        <Route path="employees" element={<Employees />} />
+        <Route path="skills" element={<Skills />} />
+        <Route path="candidate-queue" element={<CandidateQueue />} />
         <Route path="hr-management" element={<Candidates />} />
         <Route path="theory-management" element={<QuestionBank />} />
         <Route path="practical-management" element={<QuestionBank />} />
@@ -77,6 +90,22 @@ function AppRoutes() {
         <Route path="profile" element={<Profile />} />
       </Route>
 
+      {/* Employee Panel Routes */}
+      <Route
+        path="/employee"
+        element={
+          <ProtectedRoute allowedRoles={['employee']}>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="dashboard" element={<EmployeeDashboard />} />
+        <Route path="candidates" element={<MyCandidates />} />
+        <Route path="current-interview" element={<CurrentInterview />} />
+        <Route path="history" element={<InterviewHistory />} />
+        <Route path="profile" element={<EmployeeProfile />} />
+      </Route>
+
       {/* HR Panel Routes */}
       <Route
         path="/hr"
@@ -88,6 +117,7 @@ function AppRoutes() {
       >
         <Route path="dashboard" element={<HRDashboard />} />
         <Route path="notifications" element={<Notifications />} />
+        <Route path="candidate-queue" element={<CandidateQueue />} />
         <Route path="candidates" element={<Candidates />} />
         <Route path="assessments" element={<Assessments />} />
         <Route path="assign-assessment" element={<Assessments />} />

@@ -27,6 +27,9 @@ const navMenus = {
     { label: 'Dashboard', path: '/admin/dashboard', icon: FiGrid },
     { label: 'Notifications', path: '/admin/notifications', icon: FiBell },
     { label: 'Users', path: '/admin/users', icon: FiUsers },
+    { label: 'Employee Management', path: '/admin/employees', icon: FiUserCheck },
+    { label: 'Skill Master', path: '/admin/skills', icon: FiLayers },
+    { label: 'Candidate Queue', path: '/admin/candidate-queue', icon: FiActivity },
     { label: 'HR Management', path: '/admin/hr-management', icon: FiUserCheck },
     { label: 'Theory Management', path: '/admin/theory-management', icon: FiBookOpen },
     { label: 'Practical Management', path: '/admin/practical-management', icon: FiCode },
@@ -40,9 +43,17 @@ const navMenus = {
     { label: 'Settings', path: '/admin/settings', icon: FiSettings },
     { label: 'Profile', path: '/admin/profile', icon: FiUser },
   ],
+  employee: [
+    { label: 'Dashboard', path: '/employee/dashboard', icon: FiGrid },
+    { label: 'My Candidates', path: '/employee/candidates', icon: FiUsers },
+    { label: 'Current Interview', path: '/employee/current-interview', icon: FiActivity },
+    { label: 'Interview History', path: '/employee/history', icon: FiCheckSquare },
+    { label: 'Profile', path: '/employee/profile', icon: FiUser },
+  ],
   hr: [
     { label: 'Dashboard', path: '/hr/dashboard', icon: FiGrid },
     { label: 'Notifications', path: '/hr/notifications', icon: FiBell },
+    { label: 'Candidate Queue', path: '/hr/candidate-queue', icon: FiActivity },
     { label: 'Candidates', path: '/hr/candidates', icon: FiUserCheck },
     { label: 'Assessments', path: '/hr/assessments', icon: FiCheckSquare },
     { label: 'Assign Assessment', path: '/hr/assign-assessment', icon: FiLayers },
@@ -76,6 +87,7 @@ const navMenus = {
 
 const roleBadges = {
   admin: { name: 'Admin Panel', bg: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
+  employee: { name: 'Employee Panel', bg: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
   hr: { name: 'HR Panel', bg: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
   theory: { name: 'Theory Panel', bg: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
   practical: { name: 'Practical Panel', bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },

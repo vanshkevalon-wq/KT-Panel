@@ -32,6 +32,21 @@ const candidateSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    requiredRole: {
+      type: String,
+      trim: true,
+      default: 'uiux',
+    },
+    assignedEmployee: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    assignmentStatus: {
+      type: String,
+      enum: ['waiting', 'assigned', 'ongoing', 'completed', 'passed', 'failed', 'on_hold'],
+      default: 'waiting',
+    },
     status: {
       type: String,
       enum: ['active', 'inactive'],
@@ -46,5 +61,8 @@ const candidateSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+candidateSchema.index({ status: 1, requiredRole: 1, assignmentStatus: 1 });
+candidateSchema.index({ assignedEmployee: 1, assignmentStatus: 1 });
 
 module.exports = mongoose.model('Candidate', candidateSchema);

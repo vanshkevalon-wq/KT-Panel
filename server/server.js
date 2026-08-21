@@ -23,6 +23,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/skills', require('./routes/skillRoutes'));
+app.use('/api/employees', require('./routes/employeeRoutes'));
+app.use('/api/interviews', require('./routes/interviewRoutes'));
 app.use('/api/candidates', require('./routes/candidateRoutes'));
 app.use('/api/theory', require('./routes/theoryRoutes'));
 app.use('/api/practical', require('./routes/practicalRoutes'));
