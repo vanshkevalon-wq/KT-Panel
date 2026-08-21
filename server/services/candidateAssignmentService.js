@@ -16,7 +16,35 @@ const isRoleMatch = (role1, role2) => {
   const r1 = normalizeRole(role1);
   const r2 = normalizeRole(role2);
   if (!r1 || !r2) return false;
-  return r1 === r2 || r1.includes(r2) || r2.includes(r1);
+
+  if (r1 === r2 || r1.includes(r2) || r2.includes(r1)) return true;
+
+  // Token-based matching (e.g. "mern", "stack", "developer")
+  const tokens1 = String(role1).toLowerCase().split(/[^a-z0-9]+/).filter((t) => t.length > 2);
+  const tokens2 = String(role2).toLowerCase().split(/[^a-z0-9]+/).filter((t) => t.length > 2);
+
+  return tokens1.some((t1) => tokens2.includes(t1)) || tokens2.some((t2) => tokens1.includes(t2));
+};
+
+/**
+ * Scans all verified waiting candidates and attempts to auto-assign them to available employees!
+ */
+const autoAssignAllWaitingCandidates = async () => {
+  const waitingCandidates = await Candidate.find({
+    status: 'active',
+    assignmentStatus: 'waiting',
+    assignedEmployee: null,
+    applicationStatus: { $in: ['verified', 'waiting'] },
+  }).sort({ createdAt: 1 });
+
+  const assignedResults = [];
+  for (const cand of waitingCandidates) {
+    const result = await assignNextCandidateForRole(cand.requiredRole, cand._id);
+    if (result && result.candidate) {
+      assignedResults.push(result);
+    }
+  }
+  return assignedResults;
 };
 
 /**
@@ -356,6 +384,7 @@ module.exports = {
   findBestAvailableEmployee,
   assignNextCandidateForEmployee,
   assignNextCandidateForRole,
+  autoAssignAllWaitingCandidates,
   assignCandidateToEmployee,
   startInterview,
   completeInterview,

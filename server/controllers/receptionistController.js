@@ -118,11 +118,19 @@ const verifyCandidatePresence = async (req, res, next) => {
     }
 
     if (candidate.applicationStatus === 'verified' && candidate.verifiedAt) {
+      const { autoAssignAllWaitingCandidates } = require('../services/candidateAssignmentService');
+      await autoAssignAllWaitingCandidates();
+
+      const reloadedCandidate = await Candidate.findById(candidateId).populate('assignedEmployee', 'name email employeeRoles availabilityStatus');
+      const isAssigned = Boolean(reloadedCandidate && reloadedCandidate.assignedEmployee);
+
       return res.json({
-        message: `Candidate '${candidate.name}' is already checked in at reception.`,
-        candidate,
-        isAssigned: Boolean(candidate.assignedEmployee),
-        assignedEmployee: candidate.assignedEmployee ? candidate.assignedEmployee.name : null,
+        message: isAssigned
+          ? `Candidate '${reloadedCandidate.name}' is verified & assigned to employee ${reloadedCandidate.assignedEmployee.name}!`
+          : `Candidate '${reloadedCandidate.name}' is verified & waiting in queue for matching employee availability.`,
+        candidate: reloadedCandidate,
+        isAssigned,
+        assignedEmployee: isAssigned ? reloadedCandidate.assignedEmployee.name : null,
       });
     }
 

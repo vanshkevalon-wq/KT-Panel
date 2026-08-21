@@ -92,6 +92,10 @@ const completeInterviewHandler = async (req, res, next) => {
 // @access  Private (Admin, HR)
 const getCandidateQueue = async (req, res, next) => {
   try {
+    // Auto-try assigning any verified unassigned candidates waiting in queue to available employees!
+    const { autoAssignAllWaitingCandidates } = require('../services/candidateAssignmentService');
+    await autoAssignAllWaitingCandidates();
+
     const { role, status, employeeId, search } = req.query;
     const query = {
       // Exclude unverified registered candidates from Candidate Queue until Receptionist check-in!

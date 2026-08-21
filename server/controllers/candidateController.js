@@ -152,6 +152,9 @@ const detectColumnMapping = (headers) => {
 // @access  Private (Admin, HR)
 const getCandidates = async (req, res, next) => {
   try {
+    const { autoAssignAllWaitingCandidates } = require('../services/candidateAssignmentService');
+    await autoAssignAllWaitingCandidates();
+
     const { search, department, status, role } = req.query;
     const query = {};
 
