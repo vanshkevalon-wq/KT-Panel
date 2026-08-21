@@ -2,6 +2,12 @@ const mongoose = require('mongoose');
 
 const candidateSchema = new mongoose.Schema(
   {
+    enrollmentNumber: {
+      type: String,
+      unique: true,
+      uppercase: true,
+      trim: true,
+    },
     name: {
       type: String,
       required: [true, 'Candidate name is required'],
@@ -15,6 +21,10 @@ const candidateSchema = new mongoose.Schema(
       trim: true,
     },
     phone: {
+      type: String,
+      trim: true,
+    },
+    mobileNumber: {
       type: String,
       trim: true,
     },
@@ -37,6 +47,32 @@ const candidateSchema = new mongoose.Schema(
       trim: true,
       default: 'uiux',
     },
+    applicationStatus: {
+      type: String,
+      enum: ['registered', 'verified', 'waiting', 'assigned', 'ongoing', 'completed'],
+      default: 'registered',
+    },
+    interviewStatus: {
+      type: String,
+      enum: ['waiting', 'assigned', 'ongoing', 'completed'],
+      default: 'waiting',
+    },
+    result: {
+      type: String,
+      enum: ['none', 'pass', 'fail', 'on_hold'],
+      default: 'none',
+    },
+    resultPublished: {
+      type: Boolean,
+      default: true,
+    },
+    verifiedAt: {
+      type: Date,
+    },
+    verifiedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
     assignedEmployee: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -52,6 +88,33 @@ const candidateSchema = new mongoose.Schema(
       enum: ['active', 'inactive'],
       default: 'active',
     },
+    gender: {
+      type: String,
+      trim: true,
+    },
+    dob: {
+      type: Date,
+    },
+    education: {
+      type: String,
+      trim: true,
+    },
+    city: {
+      type: String,
+      trim: true,
+    },
+    address: {
+      type: String,
+      trim: true,
+    },
+    source: {
+      type: String,
+      trim: true,
+    },
+    notes: {
+      type: String,
+      trim: true,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -62,7 +125,9 @@ const candidateSchema = new mongoose.Schema(
   }
 );
 
+candidateSchema.index({ mobileNumber: 1, phone: 1 });
 candidateSchema.index({ status: 1, requiredRole: 1, assignmentStatus: 1 });
+candidateSchema.index({ applicationStatus: 1, requiredRole: 1 });
 candidateSchema.index({ assignedEmployee: 1, assignmentStatus: 1 });
 
 module.exports = mongoose.model('Candidate', candidateSchema);

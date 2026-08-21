@@ -68,6 +68,9 @@ const login = async (req, res, next) => {
 // @access  Private
 const getMe = async (req, res, next) => {
   try {
+    if (req.user && req.user.isCandidate) {
+      return res.json(req.user);
+    }
     const user = await User.findById(req.user._id);
     res.json(user);
   } catch (error) {

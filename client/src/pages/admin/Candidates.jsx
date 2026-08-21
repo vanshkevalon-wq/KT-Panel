@@ -381,9 +381,16 @@ const Candidates = () => {
                             {c.name ? c.name[0] : 'C'}
                           </div>
                           <div>
-                            <p className="font-bold text-white text-xs">{c.name}</p>
+                            <div className="flex items-center space-x-2">
+                              <p className="font-bold text-white text-xs">{c.name}</p>
+                              {c.enrollmentNumber && (
+                                <span className="px-1.5 py-0.2 text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded">
+                                  {c.enrollmentNumber}
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[11px] text-slate-400">{c.email}</p>
-                            {c.phone && <p className="text-[10px] text-slate-500">{c.phone}</p>}
+                            {(c.mobileNumber || c.phone) && <p className="text-[10px] text-slate-500">{c.mobileNumber || c.phone}</p>}
                           </div>
                         </div>
                       </td>

@@ -185,34 +185,98 @@ const getCandidates = async (req, res, next) => {
   }
 };
 
+/**
+ * Helper to auto-generate unique Enrollment Number (e.g. KT202600001)
+ */
+const generateEnrollmentNumber = async () => {
+  const currentYear = new Date().getFullYear();
+  const prefix = `KT${currentYear}`;
+
+  const lastCandidate = await Candidate.findOne({
+    enrollmentNumber: { $regex: `^${prefix}` },
+  }).sort({ createdAt: -1 });
+
+  let nextSeq = 1;
+  if (lastCandidate && lastCandidate.enrollmentNumber) {
+    const numPart = lastCandidate.enrollmentNumber.replace(prefix, '');
+    const parsed = parseInt(numPart, 10);
+    if (!isNaN(parsed)) {
+      nextSeq = parsed + 1;
+    }
+  }
+
+  return `${prefix}${String(nextSeq).padStart(5, '0')}`;
+};
+
 // @desc    Create candidate manually
 // @route   POST /api/candidates
 // @access  Private (Admin, HR)
 const createCandidate = async (req, res, next) => {
   try {
-    const { name, email, phone, position, department, experience, status, requiredRole } = req.body;
+    const {
+      enrollmentNumber,
+      name,
+      email,
+      phone,
+      mobileNumber,
+      position,
+      department,
+      experience,
+      status,
+      requiredRole,
+      gender,
+      dob,
+      education,
+      city,
+      address,
+      source,
+      notes,
+    } = req.body;
 
     if (!name || !email) {
       return res.status(400).json({ message: 'Candidate name and email are required.' });
     }
 
-    const existingCandidate = await Candidate.findOne({ email });
+    const existingCandidate = await Candidate.findOne({ email: email.toLowerCase().trim() });
     if (existingCandidate) {
       return res.status(400).json({ message: `Candidate with email '${email}' already exists.` });
     }
 
+    // Determine final enrollment number
+    let finalEnrollment = enrollmentNumber ? String(enrollmentNumber).trim().toUpperCase() : null;
+    if (finalEnrollment) {
+      const existingEnroll = await Candidate.findOne({ enrollmentNumber: finalEnrollment });
+      if (existingEnroll) {
+        return res.status(400).json({ message: `Enrollment number '${finalEnrollment}' is already assigned to another candidate.` });
+      }
+    } else {
+      finalEnrollment = await generateEnrollmentNumber();
+    }
+
     const effectiveRole = (requiredRole || position || 'uiux').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    const effectiveMobile = mobileNumber || phone || '';
 
     const candidate = await Candidate.create({
+      enrollmentNumber: finalEnrollment,
       name,
-      email,
-      phone,
+      email: email.toLowerCase().trim(),
+      phone: phone || effectiveMobile,
+      mobileNumber: effectiveMobile,
       position: position || 'Developer',
       requiredRole: effectiveRole,
       department: department || 'Engineering',
       experience: experience || '1 Year',
       status: status || 'active',
+      applicationStatus: 'registered',
+      interviewStatus: 'waiting',
       assignmentStatus: 'waiting',
+      gender,
+      dob,
+      education,
+      city,
+      address,
+      source,
+      notes,
       createdBy: req.user._id,
     });
 
@@ -220,17 +284,9 @@ const createCandidate = async (req, res, next) => {
       user: req.user,
       action: 'CREATE_CANDIDATE',
       module: 'CANDIDATE_MANAGEMENT',
-      description: `${req.user.role.toUpperCase()} user created candidate ${candidate.name} (${candidate.position}, Role: ${candidate.requiredRole}).`,
+      description: `${req.user.role.toUpperCase()} user created candidate ${candidate.name} (Enrollment: ${candidate.enrollmentNumber}, Role: ${candidate.requiredRole}).`,
       req,
     });
-
-    // Trigger automatic employee assignment
-    let assignmentResult = null;
-    try {
-      assignmentResult = await assignNextCandidateForRole(candidate.requiredRole);
-    } catch (assignError) {
-      console.error('Auto assignment error on candidate creation:', assignError.message);
-    }
 
     const responseData = await Candidate.findById(candidate._id).populate(
       'assignedEmployee',
@@ -494,6 +550,104 @@ const importCandidatesFromExcel = async (req, res, next) => {
   }
 };
 
+const User = require('../models/User');
+
+// @desc    Get all Receptionist users
+// @route   GET /api/admin/receptionists
+// @access  Private (Admin)
+const getReceptionists = async (req, res, next) => {
+  try {
+    const receptionists = await User.find({ role: 'receptionist' }).sort({ createdAt: -1 });
+    res.json(receptionists);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Create Receptionist user
+// @route   POST /api/admin/receptionists
+// @access  Private (Admin)
+const createReceptionist = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Name, email, and password are required.' });
+    }
+
+    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
+    if (existingUser) {
+      return res.status(400).json({ message: `User with email '${email}' already exists.` });
+    }
+
+    const receptionist = await User.create({
+      name,
+      email: email.toLowerCase().trim(),
+      password,
+      role: 'receptionist',
+      isActive: true,
+      createdBy: req.user._id,
+    });
+
+    await logActivity({
+      user: req.user,
+      action: 'CREATE_RECEPTIONIST',
+      module: 'USER_MANAGEMENT',
+      description: `Admin created receptionist user account ${receptionist.name} (${receptionist.email}).`,
+      req,
+    });
+
+    res.status(201).json({
+      _id: receptionist._id,
+      name: receptionist.name,
+      email: receptionist.email,
+      role: receptionist.role,
+      isActive: receptionist.isActive,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update Receptionist user
+// @route   PUT /api/admin/receptionists/:id
+// @access  Private (Admin)
+const updateReceptionist = async (req, res, next) => {
+  try {
+    const { name, email, isActive, password } = req.body;
+    const receptionist = await User.findOne({ _id: req.params.id, role: 'receptionist' });
+
+    if (!receptionist) {
+      return res.status(404).json({ message: 'Receptionist user not found.' });
+    }
+
+    if (name) receptionist.name = name;
+    if (email) receptionist.email = email.toLowerCase().trim();
+    if (isActive !== undefined) receptionist.isActive = isActive;
+    if (password) receptionist.password = password;
+
+    await receptionist.save();
+
+    await logActivity({
+      user: req.user,
+      action: 'UPDATE_RECEPTIONIST',
+      module: 'USER_MANAGEMENT',
+      description: `Admin updated receptionist user ${receptionist.name}.`,
+      req,
+    });
+
+    res.json({
+      _id: receptionist._id,
+      name: receptionist.name,
+      email: receptionist.email,
+      role: receptionist.role,
+      isActive: receptionist.isActive,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getCandidates,
   createCandidate,
@@ -501,4 +655,7 @@ module.exports = {
   deleteCandidate,
   bulkDeleteCandidates,
   importCandidatesFromExcel,
+  getReceptionists,
+  createReceptionist,
+  updateReceptionist,
 };

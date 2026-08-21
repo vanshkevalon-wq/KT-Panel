@@ -12,6 +12,7 @@ import Unauthorized from './pages/Unauthorized';
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard';
 import Users from './pages/admin/Users';
+import Receptionists from './pages/admin/Receptionists';
 import Employees from './pages/admin/Employees';
 import Skills from './pages/admin/Skills';
 import CandidateQueue from './pages/admin/CandidateQueue';
@@ -41,6 +42,21 @@ import CurrentInterview from './pages/employee/CurrentInterview';
 import InterviewHistory from './pages/employee/InterviewHistory';
 import EmployeeProfile from './pages/employee/Profile';
 
+// Candidate Panel Pages
+import CandidateLogin from './pages/candidate/Login';
+import CandidateDashboard from './pages/candidate/Dashboard';
+import CandidateProfile from './pages/candidate/Profile';
+import ApplicationStatus from './pages/candidate/ApplicationStatus';
+import CandidateResult from './pages/candidate/Result';
+import CandidateNotifications from './pages/candidate/Notifications';
+
+// Receptionist Desk Pages
+import ReceptionistDashboard from './pages/receptionist/Dashboard';
+import ReceptionistVerification from './pages/receptionist/Verification';
+import ReceptionistQueue from './pages/receptionist/Queue';
+import ReceptionistHistory from './pages/receptionist/History';
+import ReceptionistProfile from './pages/receptionist/Profile';
+
 // Candidate Test Runner
 import TakeAssessment from './pages/candidate/TakeAssessment';
 
@@ -55,6 +71,7 @@ function AppRoutes() {
     <Routes>
       {/* Public Routes */}
       <Route path="/login" element={<Login />} />
+      <Route path="/candidate/login" element={<CandidateLogin />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/assessment/take/:assignmentId" element={<TakeAssessment />} />
 
@@ -73,6 +90,7 @@ function AppRoutes() {
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="users" element={<Users />} />
+        <Route path="receptionists" element={<Receptionists />} />
         <Route path="employees" element={<Employees />} />
         <Route path="skills" element={<Skills />} />
         <Route path="candidate-queue" element={<CandidateQueue />} />
@@ -88,6 +106,38 @@ function AppRoutes() {
         <Route path="activity-logs" element={<ActivityLogs />} />
         <Route path="settings" element={<Settings />} />
         <Route path="profile" element={<Profile />} />
+      </Route>
+
+      {/* Candidate Panel Routes */}
+      <Route
+        path="/candidate"
+        element={
+          <ProtectedRoute allowedRoles={['candidate']}>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="dashboard" element={<CandidateDashboard />} />
+        <Route path="profile" element={<CandidateProfile />} />
+        <Route path="status" element={<ApplicationStatus />} />
+        <Route path="result" element={<CandidateResult />} />
+        <Route path="notifications" element={<CandidateNotifications />} />
+      </Route>
+
+      {/* Receptionist Desk Routes */}
+      <Route
+        path="/receptionist"
+        element={
+          <ProtectedRoute allowedRoles={['receptionist']}>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="dashboard" element={<ReceptionistDashboard />} />
+        <Route path="verify" element={<ReceptionistVerification />} />
+        <Route path="queue" element={<ReceptionistQueue />} />
+        <Route path="history" element={<ReceptionistHistory />} />
+        <Route path="profile" element={<ReceptionistProfile />} />
       </Route>
 
       {/* Employee Panel Routes */}

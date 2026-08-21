@@ -9,6 +9,8 @@ export const ROLE_REDIRECTS = {
   theory: '/theory/dashboard',
   practical: '/practical/dashboard',
   employee: '/employee/dashboard',
+  receptionist: '/receptionist/dashboard',
+  candidate: '/candidate/dashboard',
 };
 
 export const AuthProvider = ({ children }) => {
@@ -61,6 +63,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const candidateLogin = async (enrollmentNumber, mobileNumber) => {
+    try {
+      const res = await API.post('/candidate/login', { enrollmentNumber, mobileNumber });
+      const { token: newToken, candidate } = res.data;
+
+      localStorage.setItem('kt_token', newToken);
+      setToken(newToken);
+      const candUser = { ...candidate, role: 'candidate' };
+      setUser(candUser);
+
+      showToast(`Welcome, ${candidate.name}!`, 'success');
+      return { success: true, role: 'candidate' };
+    } catch (err) {
+      const msg =
+        err.response?.data?.message ||
+        'Enrollment number or mobile number is incorrect. Please check your details and try again.';
+      showToast(msg, 'error');
+      return { success: false, message: msg };
+    }
+  };
+
   const logout = async () => {
     try {
       if (token) {
@@ -89,6 +112,7 @@ export const AuthProvider = ({ children }) => {
         token,
         loading,
         login,
+        candidateLogin,
         logout,
         hasPermission,
         showToast,

@@ -27,6 +27,7 @@ const navMenus = {
     { label: 'Dashboard', path: '/admin/dashboard', icon: FiGrid },
     { label: 'Notifications', path: '/admin/notifications', icon: FiBell },
     { label: 'Users', path: '/admin/users', icon: FiUsers },
+    { label: 'Receptionists', path: '/admin/receptionists', icon: FiUserCheck },
     { label: 'Employee Management', path: '/admin/employees', icon: FiUserCheck },
     { label: 'Skill Master', path: '/admin/skills', icon: FiLayers },
     { label: 'Candidate Queue', path: '/admin/candidate-queue', icon: FiActivity },
@@ -42,6 +43,20 @@ const navMenus = {
     { label: 'Activity Logs', path: '/admin/activity-logs', icon: FiActivity },
     { label: 'Settings', path: '/admin/settings', icon: FiSettings },
     { label: 'Profile', path: '/admin/profile', icon: FiUser },
+  ],
+  receptionist: [
+    { label: 'Dashboard', path: '/receptionist/dashboard', icon: FiGrid },
+    { label: 'Candidate Verification', path: '/receptionist/verify', icon: FiUserCheck },
+    { label: 'Waiting Queue', path: '/receptionist/queue', icon: FiActivity },
+    { label: 'Today\'s Candidates', path: '/receptionist/history', icon: FiCheckSquare },
+    { label: 'Profile', path: '/receptionist/profile', icon: FiUser },
+  ],
+  candidate: [
+    { label: 'Dashboard', path: '/candidate/dashboard', icon: FiGrid },
+    { label: 'My Profile', path: '/candidate/profile', icon: FiUser },
+    { label: 'Application Status', path: '/candidate/status', icon: FiActivity },
+    { label: 'My Result', path: '/candidate/result', icon: FiAward },
+    { label: 'Notifications', path: '/candidate/notifications', icon: FiBell },
   ],
   employee: [
     { label: 'Dashboard', path: '/employee/dashboard', icon: FiGrid },
@@ -87,6 +102,8 @@ const navMenus = {
 
 const roleBadges = {
   admin: { name: 'Admin Panel', bg: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
+  receptionist: { name: 'Receptionist Desk', bg: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+  candidate: { name: 'Candidate Portal', bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
   employee: { name: 'Employee Panel', bg: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
   hr: { name: 'HR Panel', bg: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
   theory: { name: 'Theory Panel', bg: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
