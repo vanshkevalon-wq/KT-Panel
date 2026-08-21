@@ -27,7 +27,41 @@ const Results = () => {
   // Evaluation Form state
   const [practicalScores, setPracticalScores] = useState([]);
   const [reviewerFeedback, setReviewerFeedback] = useState('');
-  const [evaluating, setEvaluating] = useState(false);
+  // Edit Employee Interview Result Modal
+  const [isInterviewResultModalOpen, setIsInterviewResultModalOpen] = useState(false);
+  const [selectedInterviewRecord, setSelectedInterviewRecord] = useState(null);
+  const [interviewResultChoice, setInterviewResultChoice] = useState('pass');
+  const [interviewResultFeedback, setInterviewResultFeedback] = useState('');
+  const [updatingInterviewResult, setUpdatingInterviewResult] = useState(false);
+
+  const openInterviewResultEditModal = (item) => {
+    setSelectedInterviewRecord(item);
+    setInterviewResultChoice(item.result || 'pass');
+    setInterviewResultFeedback(item.feedback || '');
+    setIsInterviewResultModalOpen(true);
+  };
+
+  const handleInterviewResultUpdateSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedInterviewRecord || !selectedInterviewRecord.candidate) return;
+
+    const candId = selectedInterviewRecord.candidate._id || selectedInterviewRecord.candidate;
+
+    setUpdatingInterviewResult(true);
+    try {
+      const res = await API.put(`/interviews/candidate/${candId}/result`, {
+        result: interviewResultChoice,
+        feedback: interviewResultFeedback,
+      });
+      showToast(res.data.message || 'Candidate interview result updated successfully!', 'success');
+      setIsInterviewResultModalOpen(false);
+      fetchResults();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to update candidate interview result.', 'error');
+    } finally {
+      setUpdatingInterviewResult(false);
+    }
+  };
 
   const { showToast, user } = useAuth();
 
@@ -241,18 +275,19 @@ const Results = () => {
                   <th className="px-6 py-3.5">Completed Date</th>
                   <th className="px-6 py-3.5">Result</th>
                   <th className="px-6 py-3.5">Feedback / Remarks</th>
+                  <th className="px-6 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/80">
                 {loading ? (
                   <tr>
-                    <td colSpan="6" className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan="7" className="px-6 py-12 text-center text-slate-500">
                       Loading interview evaluation records...
                     </td>
                   </tr>
                 ) : interviewResults.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan="7" className="px-6 py-12 text-center text-slate-500">
                       No completed candidate interviews recorded yet.
                     </td>
                   </tr>
@@ -300,6 +335,15 @@ const Results = () => {
                         </td>
                         <td className="px-6 py-4 text-slate-300 max-w-xs">
                           {item.feedback || <span className="italic text-slate-600">No remarks</span>}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            onClick={() => openInterviewResultEditModal(item)}
+                            className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-bold transition"
+                          >
+                            <FiEdit className="text-xs" />
+                            <span>Change Result</span>
+                          </button>
                         </td>
                       </tr>
                     );
@@ -466,6 +510,68 @@ const Results = () => {
               >
                 <FiCheck />
                 <span>Save Evaluation & Finalize Status</span>
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* Edit Interview Result Modal */}
+      {selectedInterviewRecord && (
+        <Modal
+          isOpen={isInterviewResultModalOpen}
+          onClose={() => setIsInterviewResultModalOpen(false)}
+          title={`Change Candidate Interview Result: ${selectedInterviewRecord.candidate?.name || ''}`}
+          maxWidth="max-w-md"
+        >
+          <form onSubmit={handleInterviewResultUpdateSubmit} className="space-y-4">
+            <div className="p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
+              ℹ Changing the result here will immediately update candidate status and reflect in Candidate Portal!
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                Select Interview Result <span className="text-rose-400">*</span>
+              </label>
+              <select
+                value={interviewResultChoice}
+                onChange={(e) => setInterviewResultChoice(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white font-bold focus:outline-none focus:border-indigo-500"
+                required
+              >
+                <option value="pass">PASS (Candidate Cleared Interview)</option>
+                <option value="fail">FAIL (Candidate Rejected)</option>
+                <option value="on_hold">ON HOLD (Decision Pending)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                Feedback & Evaluation Remarks (Optional)
+              </label>
+              <textarea
+                rows={3}
+                value={interviewResultFeedback}
+                onChange={(e) => setInterviewResultFeedback(e.target.value)}
+                placeholder="Technical feedback, strengths, recommendations..."
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-3 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => setIsInterviewResultModalOpen(false)}
+                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={updatingInterviewResult}
+                className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition disabled:opacity-50"
+              >
+                {updatingInterviewResult ? 'Updating...' : 'Save & Publish Result'}
               </button>
             </div>
           </form>

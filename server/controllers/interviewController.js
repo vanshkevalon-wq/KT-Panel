@@ -210,9 +210,88 @@ const getAdminInterviewResults = async (req, res, next) => {
   }
 };
 
+// @desc    Update/Change Candidate Interview Result (Admin, HR, Employee)
+// @route   PUT /api/interviews/candidate/:id/result
+// @access  Private (Admin, HR, Employee)
+const updateCandidateInterviewResult = async (req, res, next) => {
+  try {
+    const candidateId = req.params.id;
+    const { result, feedback } = req.body;
+
+    if (!['pass', 'fail', 'on_hold'].includes(result)) {
+      return res.status(400).json({ message: 'Result must be Pass, Fail, or On Hold.' });
+    }
+
+    const candidate = await Candidate.findById(candidateId);
+    if (!candidate) {
+      return res.status(404).json({ message: 'Candidate record not found.' });
+    }
+
+    const statusMap = {
+      pass: 'passed',
+      fail: 'failed',
+      on_hold: 'on_hold',
+    };
+    const finalAssignmentStatus = statusMap[result];
+
+    // Update candidate fields
+    candidate.result = result;
+    candidate.resultPublished = true;
+    candidate.applicationStatus = 'completed';
+    candidate.interviewStatus = 'completed';
+    candidate.assignmentStatus = finalAssignmentStatus;
+    await candidate.save();
+
+    // Update or Create associated Interview record
+    let interview = await Interview.findOne({ candidate: candidate._id }).sort({ createdAt: -1 });
+    if (!interview) {
+      interview = await Interview.create({
+        candidate: candidate._id,
+        employee: req.user.role === 'employee' ? req.user._id : candidate.assignedEmployee || req.user._id,
+        requiredRole: candidate.requiredRole,
+        status: 'completed',
+        result,
+        feedback: feedback || '',
+        feedbackVisibleToCandidate: true,
+        completedAt: new Date(),
+      });
+    } else {
+      interview.status = 'completed';
+      interview.result = result;
+      if (typeof feedback === 'string') {
+        interview.feedback = feedback;
+      }
+      interview.feedbackVisibleToCandidate = true;
+      interview.completedAt = new Date();
+      await interview.save();
+    }
+
+    const resultLabel = result === 'pass' ? 'Pass' : result === 'fail' ? 'Fail' : 'On Hold';
+
+    await logActivity({
+      user: req.user,
+      action: 'UPDATE_INTERVIEW_RESULT',
+      module: 'INTERVIEWS',
+      description: `${req.user.role.toUpperCase()} ${req.user.name} updated interview result for candidate ${candidate.name} (${candidate.enrollmentNumber}) to '${resultLabel}'.`,
+      req,
+    });
+
+    const updatedCandidate = await Candidate.findById(candidate._id).populate('assignedEmployee', 'name email');
+
+    res.json({
+      message: `Interview result updated to '${resultLabel}' successfully.`,
+      candidate: updatedCandidate,
+      interview,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   startInterviewHandler,
   completeInterviewHandler,
+  updateCandidateInterviewResult,
   getCandidateQueue,
   manualAssignHandler,
   getAdminInterviewResults,

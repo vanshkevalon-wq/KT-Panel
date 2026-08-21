@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   startInterviewHandler,
   completeInterviewHandler,
+  updateCandidateInterviewResult,
   getCandidateQueue,
   manualAssignHandler,
   getAdminInterviewResults,
@@ -11,6 +12,9 @@ const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
 
 router.use(protect);
+
+// Employee / Staff Interview Result Update (Admin, HR, Employee)
+router.put('/candidate/:id/result', authorizeRoles('admin', 'hr', 'employee'), updateCandidateInterviewResult);
 
 // Employee Interview Actions
 router.post('/:id/start', authorizeRoles('employee', 'admin'), startInterviewHandler);

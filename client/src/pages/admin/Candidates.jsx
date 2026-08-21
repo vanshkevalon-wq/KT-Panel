@@ -50,6 +50,40 @@ const Candidates = () => {
   const [uploadingExcel, setUploadingExcel] = useState(false);
   const [excelResult, setExcelResult] = useState(null);
 
+  // Edit Interview Result Modal
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [selectedCandidateForResult, setSelectedCandidateForResult] = useState(null);
+  const [resultChoice, setResultChoice] = useState('pass');
+  const [resultFeedback, setResultFeedback] = useState('');
+  const [resultSubmitting, setResultSubmitting] = useState(false);
+
+  const openResultModal = (cand) => {
+    setSelectedCandidateForResult(cand);
+    setResultChoice(cand.result && cand.result !== 'none' ? cand.result : 'pass');
+    setResultFeedback('');
+    setIsResultModalOpen(true);
+  };
+
+  const handleUpdateResultSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedCandidateForResult) return;
+
+    setResultSubmitting(true);
+    try {
+      const res = await API.put(`/interviews/candidate/${selectedCandidateForResult._id}/result`, {
+        result: resultChoice,
+        feedback: resultFeedback,
+      });
+      showToast(res.data.message || 'Interview result updated successfully!', 'success');
+      setIsResultModalOpen(false);
+      fetchCandidates();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to update interview result.', 'error');
+    } finally {
+      setResultSubmitting(false);
+    }
+  };
+
   const { showToast } = useAuth();
 
   const fetchSkills = async () => {
@@ -475,6 +509,13 @@ const Candidates = () => {
                       <td className="px-5 py-4 text-right">
                         <div className="flex items-center justify-end space-x-2">
                           <button
+                            onClick={() => openResultModal(c)}
+                            title="Change / Update Interview Result (Pass / Fail / On Hold)"
+                            className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-600 hover:text-white transition"
+                          >
+                            <FiAward className="text-sm" />
+                          </button>
+                          <button
                             onClick={() => openEditModal(c)}
                             title="Edit Candidate Profile"
                             className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-indigo-400 hover:bg-slate-700 transition"
@@ -771,6 +812,66 @@ const Candidates = () => {
             )}
           </div>
         </div>
+      </Modal>
+
+      {/* Edit Interview Result Modal */}
+      <Modal
+        isOpen={isResultModalOpen}
+        onClose={() => setIsResultModalOpen(false)}
+        title={`Update Candidate Interview Result: ${selectedCandidateForResult?.name || ''}`}
+        maxWidth="max-w-md"
+      >
+        <form onSubmit={handleUpdateResultSubmit} className="space-y-4">
+          <div className="p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
+            ℹ Updating the result here will immediately change candidate status and reflect in the Candidate Portal!
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+              Select Interview Result <span className="text-rose-400">*</span>
+            </label>
+            <select
+              value={resultChoice}
+              onChange={(e) => setResultChoice(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white font-bold focus:outline-none focus:border-indigo-500"
+              required
+            >
+              <option value="pass">PASS (Candidate Cleared Interview)</option>
+              <option value="fail">FAIL (Candidate Rejected)</option>
+              <option value="on_hold">ON HOLD (Decision Pending)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+              Evaluation Remarks / Feedback (Optional)
+            </label>
+            <textarea
+              rows={3}
+              value={resultFeedback}
+              onChange={(e) => setResultFeedback(e.target.value)}
+              placeholder="Technical feedback, strengths, recommendations..."
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-3 border-t border-slate-800">
+            <button
+              type="button"
+              onClick={() => setIsResultModalOpen(false)}
+              className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={resultSubmitting}
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition disabled:opacity-50"
+            >
+              {resultSubmitting ? 'Updating...' : 'Save & Publish Result'}
+            </button>
+          </div>
+        </form>
       </Modal>
     </div>
   );
