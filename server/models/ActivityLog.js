@@ -26,6 +26,10 @@ const activityLogSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
     ipAddress: {
       type: String,
       default: '127.0.0.1',

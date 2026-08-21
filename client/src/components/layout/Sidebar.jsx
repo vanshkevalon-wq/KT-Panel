@@ -18,11 +18,13 @@ import {
   FiX,
   FiLayers,
   FiPieChart,
+  FiBell,
 } from 'react-icons/fi';
 
 const navMenus = {
   admin: [
     { label: 'Dashboard', path: '/admin/dashboard', icon: FiGrid },
+    { label: 'Notifications', path: '/admin/notifications', icon: FiBell },
     { label: 'Users', path: '/admin/users', icon: FiUsers },
     { label: 'HR Management', path: '/admin/hr-management', icon: FiUserCheck },
     { label: 'Theory Management', path: '/admin/theory-management', icon: FiBookOpen },
@@ -39,6 +41,7 @@ const navMenus = {
   ],
   hr: [
     { label: 'Dashboard', path: '/hr/dashboard', icon: FiGrid },
+    { label: 'Notifications', path: '/hr/notifications', icon: FiBell },
     { label: 'Candidates', path: '/hr/candidates', icon: FiUserCheck },
     { label: 'Assessments', path: '/hr/assessments', icon: FiCheckSquare },
     { label: 'Assign Assessment', path: '/hr/assign-assessment', icon: FiLayers },
@@ -49,6 +52,7 @@ const navMenus = {
   ],
   theory: [
     { label: 'Dashboard', path: '/theory/dashboard', icon: FiGrid },
+    { label: 'Notifications', path: '/theory/notifications', icon: FiBell },
     { label: 'Question Bank', path: '/theory/question-bank', icon: FiDatabase },
     { label: 'Questions', path: '/theory/questions', icon: FiBookOpen },
     { label: 'Question Categories', path: '/theory/categories', icon: FiLayers },
@@ -59,6 +63,7 @@ const navMenus = {
   ],
   practical: [
     { label: 'Dashboard', path: '/practical/dashboard', icon: FiGrid },
+    { label: 'Notifications', path: '/practical/notifications', icon: FiBell },
     { label: 'Practical Question Bank', path: '/practical/question-bank', icon: FiDatabase },
     { label: 'Tasks', path: '/practical/tasks', icon: FiCode },
     { label: 'Categories', path: '/practical/categories', icon: FiLayers },

@@ -145,6 +145,47 @@ const seedDefaultData = async () => {
       });
       console.log('Seeded sample Assessment');
     }
+
+    // Seed default activity logs / notifications if empty
+    const ActivityLog = require('../models/ActivityLog');
+    const logCount = await ActivityLog.countDocuments();
+    if (logCount === 0) {
+      await ActivityLog.create([
+        {
+          userEmail: 'admin@kevalontechnology.in',
+          userRole: 'admin',
+          action: 'SYSTEM_INIT',
+          module: 'System',
+          description: 'Kevalon Technology Management System initialized successfully.',
+          isRead: false,
+        },
+        {
+          userEmail: 'hr@kevalontechnology.in',
+          userRole: 'hr',
+          action: 'CANDIDATE_ADDED',
+          module: 'Candidates',
+          description: 'New candidate John Patel registered for Full Stack Assessment.',
+          isRead: false,
+        },
+        {
+          userEmail: 'theory@kevalontechnology.in',
+          userRole: 'theory',
+          action: 'QUESTION_ADDED',
+          module: 'Theory',
+          description: 'New JavaScript & Node.js theory questions published to Question Bank.',
+          isRead: false,
+        },
+        {
+          userEmail: 'practical@kevalontechnology.in',
+          userRole: 'practical',
+          action: 'TASK_CREATED',
+          module: 'Practical',
+          description: 'Practical task "Build Candidate Search Component" assigned to assessments.',
+          isRead: false,
+        },
+      ]);
+      console.log('Seeded sample Activity Logs / Notifications');
+    }
   } catch (error) {
     console.error('Error during data seeding:', error.message);
   }

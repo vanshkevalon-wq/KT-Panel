@@ -19,6 +19,7 @@ import Results from './pages/admin/Results';
 import ActivityLogs from './pages/admin/ActivityLogs';
 import Settings from './pages/admin/Settings';
 import Profile from './pages/admin/Profile';
+import Notifications from './pages/Notifications';
 
 // HR Pages
 import HRDashboard from './pages/hr/Dashboard';
@@ -59,6 +60,7 @@ function AppRoutes() {
         }
       >
         <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="notifications" element={<Notifications />} />
         <Route path="users" element={<Users />} />
         <Route path="hr-management" element={<Candidates />} />
         <Route path="theory-management" element={<QuestionBank />} />
@@ -84,6 +86,7 @@ function AppRoutes() {
         }
       >
         <Route path="dashboard" element={<HRDashboard />} />
+        <Route path="notifications" element={<Notifications />} />
         <Route path="candidates" element={<Candidates />} />
         <Route path="assessments" element={<Assessments />} />
         <Route path="assign-assessment" element={<Assessments />} />
@@ -103,6 +106,7 @@ function AppRoutes() {
         }
       >
         <Route path="dashboard" element={<TheoryDashboard />} />
+        <Route path="notifications" element={<Notifications />} />
         <Route path="question-bank" element={<QuestionBank />} />
         <Route path="questions" element={<QuestionBank />} />
         <Route path="categories" element={<QuestionBank />} />
@@ -122,6 +126,7 @@ function AppRoutes() {
         }
       >
         <Route path="dashboard" element={<PracticalDashboard />} />
+        <Route path="notifications" element={<Notifications />} />
         <Route path="question-bank" element={<QuestionBank />} />
         <Route path="tasks" element={<QuestionBank />} />
         <Route path="categories" element={<QuestionBank />} />
