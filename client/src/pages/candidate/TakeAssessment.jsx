@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import API from '../../services/api';
 import Badge from '../../components/common/Badge';
+import ThemeToggle from '../../components/common/ThemeToggle';
 import {
   FiClock,
   FiCheckCircle,
@@ -190,20 +191,25 @@ const TakeAssessment = () => {
           </div>
         </div>
 
-        {/* Timer */}
-        <div className="flex items-center space-x-2 bg-slate-950 border border-slate-800 rounded-xl px-4 py-1.5 font-mono text-xs text-amber-400 font-bold">
-          <FiClock className="text-sm animate-pulse" />
-          <span>{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</span>
-        </div>
+        <div className="flex items-center space-x-4">
+          {/* Theme Toggle */}
+          <ThemeToggle />
 
-        <button
-          onClick={handleSubmitAssessment}
-          disabled={submitting}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg flex items-center space-x-1.5"
-        >
-          <FiSend />
-          <span>Submit Assessment</span>
-        </button>
+          {/* Timer */}
+          <div className="flex items-center space-x-2 bg-slate-950 border border-slate-800 rounded-xl px-4 py-1.5 font-mono text-xs text-amber-400 font-bold">
+            <FiClock className="text-sm animate-pulse" />
+            <span>{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</span>
+          </div>
+
+          <button
+            onClick={handleSubmitAssessment}
+            disabled={submitting}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg flex items-center space-x-1.5"
+          >
+            <FiSend />
+            <span>Submit Assessment</span>
+          </button>
+        </div>
       </header>
 
       {/* Main Content Area */}

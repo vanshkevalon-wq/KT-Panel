@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import API from '../../services/api';
+import ThemeToggle from '../common/ThemeToggle';
 import {
   FiMenu,
   FiBell,
@@ -104,6 +105,9 @@ const Navbar = ({ setMobileOpen }) => {
 
       {/* Right actions */}
       <div className="flex items-center space-x-3 relative" ref={popupRef}>
+        {/* Theme Toggle Button */}
+        <ThemeToggle />
+
         {/* Notification Bell with Popup */}
         <div className="relative">
           <button

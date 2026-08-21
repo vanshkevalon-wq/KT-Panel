@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, ROLE_REDIRECTS } from '../../context/AuthContext';
+import ThemeToggle from '../../components/common/ThemeToggle';
 import { FiLock, FiMail, FiArrowRight } from 'react-icons/fi';
 
 const Login = () => {
@@ -25,7 +26,12 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 sm:p-6 text-slate-100">
+    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 sm:p-6 text-slate-100 relative">
+      {/* Top right theme toggle */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10">
+        <ThemeToggle showLabel={true} />
+      </div>
+
       <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 relative">
         {/* Branding Logo */}
         <div className="text-center mb-8">

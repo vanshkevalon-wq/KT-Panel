@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import ThemeToggle from '../common/ThemeToggle';
 import {
   FiGrid,
   FiUsers,
@@ -134,12 +135,13 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
           </button>
         </div>
 
-        {/* Current Active Panel Badge */}
-        <div className="px-4 py-3">
-          <div className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center justify-between ${currentBadge.bg}`}>
+        {/* Current Active Panel Badge & Theme Toggle */}
+        <div className="px-4 py-3 flex items-center justify-between gap-2">
+          <div className={`flex-1 px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center justify-between ${currentBadge.bg}`}>
             <span>{currentBadge.name}</span>
             <span className="w-2 h-2 rounded-full bg-current"></span>
           </div>
+          <ThemeToggle />
         </div>
 
         {/* Navigation Items List */}
