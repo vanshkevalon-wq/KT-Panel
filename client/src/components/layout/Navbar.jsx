@@ -129,7 +129,7 @@ const Navbar = ({ setMobileOpen }) => {
 
           {/* Notification Popup Dropdown */}
           {showPopup && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="fixed top-16 left-3 right-3 sm:absolute sm:top-full sm:right-0 sm:left-auto sm:mt-2 sm:w-96 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
               {/* Header */}
               <div className="p-3.5 px-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
