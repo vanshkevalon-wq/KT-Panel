@@ -30,7 +30,6 @@ import {
   FiHeart,
   FiMenu,
   FiX,
-  FiCheck,
 } from 'react-icons/fi';
 
 const LandingPage = () => {
