@@ -154,7 +154,7 @@ const verifyCandidatePresence = async (req, res, next) => {
     // Automatically trigger Candidate Assignment Engine for candidate's required role
     let assignmentResult = null;
     try {
-      assignmentResult = await assignNextCandidateForRole(candidate.requiredRole);
+      assignmentResult = await assignNextCandidateForRole(candidate.requiredRole, candidate._id);
     } catch (assignErr) {
       console.error('Auto assignment error post-verification:', assignErr.message);
     }

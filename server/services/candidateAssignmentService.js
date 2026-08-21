@@ -124,20 +124,32 @@ const assignNextCandidateForEmployee = async (employeeId) => {
 /**
  * Assigns next available candidate matching requiredRole to an available employee.
  */
-const assignNextCandidateForRole = async (requiredRole) => {
+const assignNextCandidateForRole = async (requiredRole, candidateId = null) => {
   const normRole = normalizeRole(requiredRole);
-  if (!normRole) return null;
 
-  const waitingCandidates = await Candidate.find({
-    status: 'active',
-    assignmentStatus: 'waiting',
-    assignedEmployee: null,
-    applicationStatus: { $in: ['verified', 'waiting'] },
-  }).sort({ createdAt: 1 });
+  let candidateToAssign = null;
 
-  const candidateToAssign = waitingCandidates.find((cand) =>
-    isRoleMatch(cand.requiredRole, requiredRole)
-  );
+  if (candidateId) {
+    candidateToAssign = await Candidate.findOne({
+      _id: candidateId,
+      status: 'active',
+      assignmentStatus: 'waiting',
+      applicationStatus: { $in: ['verified', 'waiting'] },
+    });
+  }
+
+  if (!candidateToAssign && normRole) {
+    const waitingCandidates = await Candidate.find({
+      status: 'active',
+      assignmentStatus: 'waiting',
+      assignedEmployee: null,
+      applicationStatus: { $in: ['verified', 'waiting'] },
+    }).sort({ createdAt: 1 });
+
+    candidateToAssign = waitingCandidates.find((cand) =>
+      isRoleMatch(cand.requiredRole, requiredRole)
+    );
+  }
 
   if (!candidateToAssign) {
     return null;
@@ -145,7 +157,7 @@ const assignNextCandidateForRole = async (requiredRole) => {
 
   const bestEmployee = await findBestAvailableEmployee(candidateToAssign.requiredRole);
   if (!bestEmployee) {
-    return null;
+    return null; // No available employee for this field -> Admin will manually assign!
   }
 
   return await assignCandidateToEmployee(candidateToAssign._id, bestEmployee._id);
